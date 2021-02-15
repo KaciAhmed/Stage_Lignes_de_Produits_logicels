@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Stack;
 
 public class Application {
-	
+
 	public static String classpath = System.getProperty("java.class.path");
 	static String inputFile = "";
 	static String outputFile = classpath + File.separator + "out/output";
@@ -23,13 +23,13 @@ public class Application {
 		if(args.length > 0){
 			inputFile = args[0];
 			if (args.length > 1){
-				outputFile = args[1]; 
+				outputFile = args[1];
 			}
-		}		
+		}
 		else {
 			System.out.println("Usage <path/to/code.java> <optional/path/to/result.xml>");
-		}	
-		
+		}
+
 		readFile();
 	    creerArborescenceDesAnnotations(contenuFichier,0,0,0);
 		affichageAnnotations();
@@ -62,7 +62,7 @@ public class Application {
 			if(estDebutAnnotation(motsCles)){
 				String predicat = ligneCourante.substring(motsCles[0].length());
 				nbLigneTotal++;
-				degre++;				
+				degre++;
 				setupAnnotationCouranteAvec(degre, indiceCurseurDeLigne, nbCharLigneCourante, predicat);
 				pileAnnotation.push(annotationCourante);
 				indiceCurseurDeLigne++;
@@ -81,7 +81,7 @@ public class Application {
 					annotationCouranteDePileIncrementNbLigneAvecNbChar(nbCharLigneCourante);
 					indiceCurseurDeLigne++;
 					nbLigneTotal++;
-					creerArborescenceDesAnnotations(codeParserParLigne, degre, indiceCurseurDeLigne, nbLigneTotal);	
+					creerArborescenceDesAnnotations(codeParserParLigne, degre, indiceCurseurDeLigne, nbLigneTotal);
 				}else{
 					indiceCurseurDeLigne++;
 					nbLigneTotal++;
@@ -97,11 +97,11 @@ public class Application {
 		setupAnnotationAvecIncrementNbChar(nbCharLigneCourante);
 		pileAnnotation.push(annotationCourante);
 	}
-	
+
 	public static boolean toutEstVisite(List<String> lstContenu, int indice){
 		return indice == lstContenu.size();
 	}
-	
+
 	public static void setupAnnotationCouranteAvec(int degree, int indice, int nbCharLigneCourante, String predicat) {
 		annotationCourante = new Annotation();
 		setupAnnotationAvecDegree(degree);
@@ -148,15 +148,15 @@ public class Application {
 	private static boolean estDebutAnnotation(String[] motsCles) {
 		return motsCles[0].contains(Annotation.DEBUT_ANNOTATION);
 	}
-	
+
 	public static boolean estMillieuAnnotation(String[] motsCle){
 		return !estDebutOuFinAnnotation(motsCle);
 	}
-	
+
 	public static boolean estDebutOuFinAnnotation(String[] motsCle){
 		return estDebutAnnotation(motsCle) || estFinAnnotation(motsCle);
 	}
-	
+
 	private static void affichageAnnotations() {
 		for (Annotation annotation : annotations) {
 			System.out.println(annotation);

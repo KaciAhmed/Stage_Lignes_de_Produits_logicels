@@ -6,7 +6,7 @@ class Annotation {
 
 	private String nomDuFichier;
 	private String predicat;
-	private List<String> variables; 
+	private List<String> variables;
 	private int debutDeLigne;
 	private int nbLigne;
 	private int degre;
@@ -26,9 +26,9 @@ class Annotation {
 		this.degre = 0;
 		this.nbChar =0;
 	}
-	
+
 	public String toString(){
-		return "ANNOTATION {" + 
+		return "ANNOTATION {" +
 				"\n\tFICHIER= " + nomDuFichier+
 				"\n\tPREDICAT= " + predicat +
 				"\n\tVARIABLES= " + variables +
@@ -38,27 +38,26 @@ class Annotation {
 				"\n\tNBCHAR= " + nbChar +
 				"\n}\n";
 	}
-	
+
 	public void incrementNbLigne(){
 		this.nbLigne++;
 	}
-	
+
 	public void incrementNbChar(int nb){
-		this.nbChar += nb;	
+		this.nbChar += nb;
 	}
-	
 	public int getStartLine() {
 		return this.debutDeLigne;
 	}
 	public String getFichier() {
 		return this.nomDuFichier;
-	}	
+	}
 	public String getPredicat() {
 		return this.predicat;
-	}	
+	}
 	public List<String> getVariables() {
 		return this.variables;
-	}	
+	}
 	public int getNbLine() {
 		return this.nbLigne;
 	}
@@ -68,7 +67,7 @@ class Annotation {
 	public int getNbChar() {
 		return this.nbChar;
 	}
-	
+
 	public void setFichier(String fichier) {
 		this.nomDuFichier = fichier;
 	}
