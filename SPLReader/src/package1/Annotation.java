@@ -2,95 +2,92 @@ package package1;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
-
 class Annotation {
-	// Un VP
-	private String fichier;
-	private String predicat; // Addition && Soustraction
-	private List<String> variables; // [0] = Addition  [1] = Soustraction
-	private int startLine;
-	private int nbLine;
+
+	private String nomDuFichier;
+	private String predicat;
+	private List<String> variables; 
+	private int debutDeLigne;
+	private int nbLigne;
 	private int degre;
 	private int nbChar;
 
+	public static String ESPACE = " ";
+	public static String DEBUT_ANNOTATION = "//#if";
+	public static String CHANGEMENT_ANNOTATION = "//#elif";
+	public static String FIN_ANNOTATION = "//#endif";
+
 	public Annotation () {
-		this.fichier = "";
+		this.nomDuFichier = "";
 		this.predicat = "";
 		this.variables = new ArrayList<String>();
-		this.startLine = -1;
-		this.nbLine = -1;
-		this.degre = -1;
-		this.nbChar = -1;
-	}
-
-	public String getFichier() {
-		return fichier;
-	}
-
-	public void setFichier(String fichier) {
-		this.fichier = fichier;
-	}
-
-	public String getPredicat() {
-		return predicat;
+		this.debutDeLigne = 0;
+		this.nbLigne = 0;
+		this.degre = 0;
+		this.nbChar =0;
 	}
 	
+	public String toString(){
+		return "ANNOTATION {" + 
+				"\n\tFICHIER= " + nomDuFichier+
+				"\n\tPREDICAT= " + predicat +
+				"\n\tVARIABLES= " + variables +
+				"\n\tSTARTLINE= " + debutDeLigne +
+				"\n\tNBLINE= " + nbLigne +
+				"\n\tDEGRE= " + degre +
+				"\n\tNBCHAR= " + nbChar +
+				"\n}\n";
+	}
+	
+	public void incrementNbLigne(){
+		this.nbLigne++;
+	}
+	
+	public void incrementNbChar(int nb){
+		this.nbChar += nb;	
+	}
+	
+	public int getStartLine() {
+		return this.debutDeLigne;
+	}
+	public String getFichier() {
+		return this.nomDuFichier;
+	}	
+	public String getPredicat() {
+		return this.predicat;
+	}	
+	public List<String> getVariables() {
+		return this.variables;
+	}	
+	public int getNbLine() {
+		return this.nbLigne;
+	}
+	public int getDegre() {
+		return this.degre;
+	}
+	public int getNbChar() {
+		return this.nbChar;
+	}
+	
+	public void setFichier(String fichier) {
+		this.nomDuFichier = fichier;
+	}
 	public void setPredicat(String predicat) {
 		this.predicat = predicat;
 	}
-
-	public List<String> getVariables() {
-		return variables;
-	}
-
 	public void setVariables(List<String> variables) {
 		this.variables = variables;
 	}
-
-	public int getStartLine() {
-		return startLine;
+	public void setStartLigne(int startLine) {
+		this.debutDeLigne = startLine;
 	}
-	
-	public void setStartLine(int startLine) {
-		this.startLine = startLine;
-	}
-
-	public int getNbLine() {
-		return nbLine;
-	}
-
 	public void setNbLine(int nbLine) {
-		this.nbLine = nbLine;
+		this.nbLigne = nbLine;
 	}
-
-	public int getDegre() {
-		return degre;
-	}
-	
 	public void setDegre(int degre) {
 		this.degre = degre;
 	}
-
-	public int getNbChar() {
-		return nbChar;
-	}
-
 	public void setNbChar(int nbChar) {
 		this.nbChar = nbChar;
-	}
-
-	public String toString(){
-		return "Annotation {" + 
-				"\nfichier= " + fichier +
-				"\npredicat= " + predicat +
-				"\nvariables= " + variables +
-				"\nstartLine= " + startLine +
-				"\nnbLine= " + nbLine +
-				"\ndegre= " + degre +
-				"\nnbChar= " + nbChar +
-				"\n}\n";
 	}
 }
