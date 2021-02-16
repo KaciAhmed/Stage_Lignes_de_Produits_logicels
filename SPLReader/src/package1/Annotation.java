@@ -16,6 +16,8 @@ class Annotation {
 	public static String DEBUT_ANNOTATION = "//#if";
 	public static String CHANGEMENT_ANNOTATION = "//#elif";
 	public static String FIN_ANNOTATION = "//#endif";
+	public static final String REGEX_TAB = "\\t";
+	public static final String STRING_VIDE = "";
 
 	public Annotation () {
 		this.nomDuFichier = "";

@@ -11,8 +11,9 @@ import java.util.Stack;
 
 public class Application {
 
+
 	public static String classpath = System.getProperty("java.class.path");
-	static String inputFile = "";
+	static String inputFile = Annotation.STRING_VIDE;
 	static String outputFile = classpath + File.separator + "out/output";
 	public static List<String> contenuFichier = new ArrayList<String>();
 	public static List<Annotation> annotations = new ArrayList<Annotation>();
@@ -47,11 +48,12 @@ public class Application {
 			System.out.println("Tout est visite");
 		} else {
 			String ligneCourante = codeParserParLigne.get(indiceCurseurDeLigne);
+			ligneCourante = ligneCourante.replaceAll(Annotation.REGEX_TAB, Annotation.STRING_VIDE);
 			int nbCharLigneCourante = ligneCourante.length();
 			String[] motsCles = ligneCourante.trim().split(Annotation.ESPACE);
 			if (estDebutAnnotation(motsCles)) {
 				miseAjourPileAnnotation(nbCharLigneCourante);
-				String predicat = ligneCourante.substring(motsCles[0].length());
+				String predicat = ligneCourante.substring(motsCles[0].trim().length()).trim();
 				nbLigneTotal++;
 				degre++;
 				setupAnnotationCouranteAvec(degre, indiceCurseurDeLigne, nbCharLigneCourante, predicat);
