@@ -36,7 +36,7 @@ class Annotation {
 				"\n\tNBLINE= " + nbLigne +
 				"\n\tDEGRE= " + degre +
 				"\n\tNBCHAR= " + nbChar +
-				"\n}\n";
+				"\n}";
 	}
 
 	public void incrementNbLigne(){
