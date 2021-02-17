@@ -4,6 +4,9 @@ import java.util.List;
 
 class Annotation {
 
+	private static final int NUMERO_NON_DEFINI = -1;
+	private static final String FICHIER_NON_DEFINI = "non defini";
+	private static final String PREDICAT_NON_DEFINI = "non defini";
 	private String nomDuFichier;
 	private String predicat;
 	private List<String> variables;
@@ -20,31 +23,56 @@ class Annotation {
 	public static final String STRING_VIDE = "";
 
 	public Annotation () {
-		this.nomDuFichier = "";
-		this.predicat = "";
+		this.nomDuFichier = FICHIER_NON_DEFINI;
+		this.predicat = PREDICAT_NON_DEFINI;
 		this.variables = new ArrayList<String>();
-		this.debutDeLigne = 0;
-		this.nbLigne = 0;
-		this.degre = 0;
-		this.nbChar =0;
+		this.debutDeLigne = NUMERO_NON_DEFINI;
+		this.nbLigne = NUMERO_NON_DEFINI;
+		this.degre = NUMERO_NON_DEFINI;
+		this.nbChar = NUMERO_NON_DEFINI;
+	}
+
+	public static Annotation makeAnnotation(String predicat, List<String> variables, int degre, int nbChar, int nbLigne) {
+		Annotation product = new Annotation();
+		product.setFichier(FICHIER_NON_DEFINI);
+		product.setPredicat(predicat);
+		product.setVariables(variables);
+		product.setDebutDeLigne(NUMERO_NON_DEFINI);
+		product.setDegre(degre);
+		product.setNbChar(nbChar);
+		product.setNbLine(nbLigne);
+		return product;		
+	}
+	
+	public static Annotation makeAnnotation(Annotation obj) {
+		return makeAnnotation(obj.getPredicat(),
+				obj.getVariables(), 
+				obj.getDegre(), 
+				obj.getNbChar(), 
+				obj.getNbLine()
+		);
 	}
 
 	public String toString(){
 		return "ANNOTATION {" +
-				"\n\tFICHIER= " + nomDuFichier+
+				(nomDuFichier.equals(FICHIER_NON_DEFINI) ? STRING_VIDE : "\n\tFICHIER= " + nomDuFichier) +
 				"\n\tPREDICAT= " + predicat +
 				"\n\tVARIABLES= " + variables +
-				"\n\tSTARTLINE= " + debutDeLigne +
-				"\n\tNBLINE= " + nbLigne +
+				(debutDeLigne == NUMERO_NON_DEFINI? STRING_VIDE : "\n\tDEBUT_DE_LIGNE= " + debutDeLigne) +
+				"\n\tNB_LIGNE= " + nbLigne +
 				"\n\tDEGRE= " + degre +
-				"\n\tNBCHAR= " + nbChar +
+				"\n\tNB_CHAR= " + nbChar +
 				"\n}";
 	}
 
 	public void incrementNbLigne(){
-		this.nbLigne++;
+		incrementNbLigne(1);
 	}
-
+	
+	public void incrementNbLigne(int i) {
+		this.nbLigne += i;
+	}
+	
 	public void incrementNbChar(int nb){
 		this.nbChar += nb;
 	}
@@ -79,7 +107,7 @@ class Annotation {
 	public void setVariables(List<String> variables) {
 		this.variables = variables;
 	}
-	public void setStartLigne(int startLine) {
+	public void setDebutDeLigne(int startLine) {
 		this.debutDeLigne = startLine;
 	}
 	public void setNbLine(int nbLine) {
@@ -91,4 +119,30 @@ class Annotation {
 	public void setNbChar(int nbChar) {
 		this.nbChar = nbChar;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((predicat == null) ? 0 : predicat.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Annotation other = (Annotation) obj;
+		if (predicat == null) {
+			if (other.predicat != null)
+				return false;
+		} else if (!predicat.equals(other.predicat))
+			return false;
+		return true;
+	}
+
 }

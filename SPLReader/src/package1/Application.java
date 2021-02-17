@@ -112,7 +112,7 @@ public class Application {
 	}
 
 	public static void setupAnnotationAvecDebutLigne(int indice) {
-		annotationCourante.setStartLigne(indice + 1);
+		annotationCourante.setDebutDeLigne(indice + 1);
 	}
 
 	public static void setupAnnotationAvecDegree(int degree) {
@@ -155,9 +155,27 @@ public class Application {
 	}
 
 	private static void affichageAnnotations() {
-		for (Annotation annotation : annotations) {
+		List<Annotation> annotationParcourue = new ArrayList<Annotation>();
+		for (Annotation annotationItt : annotations) {
+			boolean present = false;
+			for (Annotation annotationItt2 : annotationParcourue) {
+				if(estAnnotationEgal(annotationItt, annotationItt2)) {
+					present = true;
+					annotationItt2.incrementNbChar(annotationItt.getNbChar());
+					annotationItt2.incrementNbLigne(annotationItt.getNbLine());
+				}
+			}
+			if(false == present) {
+				annotationParcourue.add(Annotation.makeAnnotation(annotationItt));
+			}
+		}
+		for (Annotation annotation : annotationParcourue) {
 			System.out.println(annotation);
 		}
+	}
+
+	public static boolean estAnnotationEgal(Annotation annotation1, Annotation annotation2) {
+		return annotation1.equals(annotation2);
 	}
 
 	private static boolean estDebutAnnotation(String[] motsCles) {
