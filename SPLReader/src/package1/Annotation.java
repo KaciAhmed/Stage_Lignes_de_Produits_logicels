@@ -4,8 +4,8 @@ import java.util.List;
 
 class Annotation {
 
-	private static final int NUMERO_NON_DEFINI = -1;
-	private static final String FICHIER_NON_DEFINI = "non defini";
+	static final int NUMERO_NON_DEFINI = -1;
+	static final String FICHIER_NON_DEFINI = "non defini";
 	private static final String PREDICAT_NON_DEFINI = "non defini";
 	private String nomDuFichier;
 	private String predicat;
@@ -30,27 +30,6 @@ class Annotation {
 		this.nbLigne = NUMERO_NON_DEFINI;
 		this.degre = NUMERO_NON_DEFINI;
 		this.nbChar = NUMERO_NON_DEFINI;
-	}
-
-	public static Annotation makeAnnotation(String predicat, List<String> variables, int degre, int nbChar, int nbLigne) {
-		Annotation product = new Annotation();
-		product.setFichier(FICHIER_NON_DEFINI);
-		product.setPredicat(predicat);
-		product.setVariables(variables);
-		product.setDebutDeLigne(NUMERO_NON_DEFINI);
-		product.setDegre(degre);
-		product.setNbChar(nbChar);
-		product.setNbLine(nbLigne);
-		return product;		
-	}
-	
-	public static Annotation makeAnnotation(Annotation obj) {
-		return makeAnnotation(obj.getPredicat(),
-				obj.getVariables(), 
-				obj.getDegre(), 
-				obj.getNbChar(), 
-				obj.getNbLine()
-		);
 	}
 
 	public String toString(){

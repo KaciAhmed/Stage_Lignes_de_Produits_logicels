@@ -11,7 +11,6 @@ import java.util.Stack;
 
 public class Application {
 
-
 	public static String classpath = System.getProperty("java.class.path");
 	static String inputFile = Annotation.STRING_VIDE;
 	static String outputFile = classpath + File.separator + "out/output";
@@ -19,32 +18,11 @@ public class Application {
 	public static List<Annotation> annotations = new ArrayList<Annotation>();
 	public static Annotation annotationCourante = new Annotation();
 	public static Stack<Annotation> pileAnnotation = new Stack<Annotation>();
-
-	public static void main(String[] args) {
-		if (args.length > 0) {
-			inputFile = args[0];
-			if (args.length > 1) {
-				outputFile = args[1];
-			}
-		} else {
-			System.out.println("Usage <path/to/code.java> <optional/path/to/result.xml>");
-		}
-
-		readFile();
-		creerArborescenceDesAnnotations(contenuFichier, 0, 0, 0);
-		affichageAnnotations();
-	}
-	
-	public static void annotationCouranteDePileIncrementNbLigneAvecNbChar(int nbCharLigneCourante) {
-		annotationCourante = pileAnnotation.pop();
-		annotationCourante.incrementNbLigne();
-		setupAnnotationAvecIncrementNbChar(nbCharLigneCourante);
-		pileAnnotation.push(annotationCourante);
-	}
+	private static List<Annotation> annotationsUniques = new ArrayList<Annotation>();
 
 	public static void creerArborescenceDesAnnotations(List<String> codeParserParLigne, int degre,
 			int indiceCurseurDeLigne, int nbLigneTotal) {
-		if (toutEstVisite(codeParserParLigne, indiceCurseurDeLigne)) {
+		if (estCurseurFin(codeParserParLigne, indiceCurseurDeLigne)) {
 			System.out.println("Tout est visite");
 		} else {
 			String ligneCourante = codeParserParLigne.get(indiceCurseurDeLigne);
@@ -79,12 +57,32 @@ public class Application {
 		}
 	}
 
+	public static boolean estCurseurFin(List<String> lstContenu, int indice) {
+		return indice == lstContenu.size();
+	}
+
 	public static boolean estDebutOuFinAnnotation(String[] motsCle) {
 		return estDebutAnnotation(motsCle) || estFinAnnotation(motsCle);
 	}
 
 	public static boolean estMillieuAnnotation(String[] motsCle) {
 		return !estDebutOuFinAnnotation(motsCle);
+	}
+
+	public static void main(String[] args) {
+		if (args.length > 0) {
+			inputFile = args[0];
+			if (args.length > 1) {
+				outputFile = args[1];
+			}
+		} else {
+			System.out.println("Usage <path/to/code.java> <optional/path/to/result.xml>");
+		}
+
+		readFile();
+		creerArborescenceDesAnnotations(contenuFichier, 0, 0, 0);
+		triEtExtractionAnnotationsUnique();
+		affichageAnnotations();
 	}
 
 	public static void miseAjourPileAnnotation(int nbCharLigneCourante) {
@@ -150,32 +148,27 @@ public class Application {
 		annotationCourante.setVariables(lstVar);
 	}
 
-	public static boolean toutEstVisite(List<String> lstContenu, int indice) {
-		return indice == lstContenu.size();
-	}
-
-	private static void affichageAnnotations() {
-		List<Annotation> annotationParcourue = new ArrayList<Annotation>();
+	public static void triEtExtractionAnnotationsUnique() {
+		assert (annotationsUniques != null);
 		for (Annotation annotationItt : annotations) {
 			boolean present = false;
-			for (Annotation annotationItt2 : annotationParcourue) {
-				if(estAnnotationEgal(annotationItt, annotationItt2)) {
+			for (Annotation annotationItt2 : annotationsUniques) {
+				if (annotationItt.equals(annotationItt2)) {
 					present = true;
 					annotationItt2.incrementNbChar(annotationItt.getNbChar());
 					annotationItt2.incrementNbLigne(annotationItt.getNbLine());
 				}
 			}
-			if(false == present) {
-				annotationParcourue.add(Annotation.makeAnnotation(annotationItt));
+			if (false == present) {
+				annotationsUniques.add(FabricationAnnotation.makeAnnotation(annotationItt));
 			}
-		}
-		for (Annotation annotation : annotationParcourue) {
-			System.out.println(annotation);
 		}
 	}
 
-	public static boolean estAnnotationEgal(Annotation annotation1, Annotation annotation2) {
-		return annotation1.equals(annotation2);
+	private static void affichageAnnotations() {
+		for (Annotation annotation : annotationsUniques) {
+			System.out.println(annotation);
+		}
 	}
 
 	private static boolean estDebutAnnotation(String[] motsCles) {
