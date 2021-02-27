@@ -12,17 +12,18 @@ import java.util.Stack;
 public class Application {
 
 	public static String classpath = System.getProperty("java.class.path");
+	static String inputDirectory =Annotation.STRING_VIDE;
 	static String inputFile = Annotation.STRING_VIDE;
 	static String outputFile = classpath + File.separator + "out/output";
-	public static List<String> contenuFichier = new ArrayList<String>();
+	public static List<String> contenuFichier;
 	public static List<Annotation> annotations = new ArrayList<Annotation>();
 	public static Annotation annotationCourante = new Annotation();
 	public static Stack<Annotation> pileAnnotation = new Stack<Annotation>();
-	private static List<Annotation> annotationsUniques = new ArrayList<Annotation>();
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
-			inputFile = args[0];
+			//inputFile = args[0];
+			inputDirectory=args[0];
 			if (args.length > 1) {
 				outputFile = args[1];
 			}
@@ -30,10 +31,8 @@ public class Application {
 			System.out.println("Usage <path/to/code/> <optional/path/to/result.xml>");
 		}
 		// read directory
-		readFile();
-		creerArborescenceDesAnnotations(contenuFichier, 0, 0, 0);
-	//	triEtExtractionAnnotationsUnique();
-		affichageAnnotations(annotations);
+		File folder = new File(inputDirectory);
+		findAllFilesInFolder(folder);
 	}
 
 	public static void creerArborescenceDesAnnotations(List<String> codeParserParLigne, int degre,
@@ -50,19 +49,18 @@ public class Application {
 				String predicat = ligneCourante.substring(motsCles[0].trim().length()).trim();
 				nbLigneTotal++;
 				degre++;
+				indiceCurseurDeLigne++;
 				setupAnnotationCouranteAvec(degre, indiceCurseurDeLigne, nbCharLigneCourante, predicat);
 				pileAnnotation.push(annotationCourante);
-				indiceCurseurDeLigne++;
 				creerArborescenceDesAnnotations(codeParserParLigne, degre, indiceCurseurDeLigne, nbLigneTotal);
 			} else if (estFinAnnotation(motsCles)) {
+				miseAjourPileAnnotation(nbCharLigneCourante);
 				annotationCourante = pileAnnotation.pop();
-				annotationCourante.incrementNbLigne();
-				annotationCourante.incrementNbChar(nbCharLigneCourante);
 				annotations.add(annotationCourante);
 				degre--;
 				indiceCurseurDeLigne++;
 				nbLigneTotal++;
-				miseAjourPileAnnotation(nbCharLigneCourante);
+				
 				creerArborescenceDesAnnotations(codeParserParLigne, degre, indiceCurseurDeLigne, nbLigneTotal);
 			} else if (estMillieuAnnotation(motsCles)) {
 				miseAjourPileAnnotation(nbCharLigneCourante);
@@ -108,7 +106,7 @@ public class Application {
 			InputStreamReader iReader = new InputStreamReader(new FileInputStream(inputFile), "UTF-8");
 			BufferedReader bufferedReader = new BufferedReader(iReader);
 			String line;
-
+			contenuFichier = new ArrayList<String>();
 			while ((line = bufferedReader.readLine()) != null) {
 				contenuFichier.add(line);
 			}
@@ -124,14 +122,14 @@ public class Application {
 		annotationCourante = new Annotation();
 		annotationCourante.setDegre(degree);
 		annotationCourante.setFichier(inputFile);
-		annotationCourante.setDebutDeLigne(indice + 1);
+		annotationCourante.setDebutDeLigne(indice);
 		annotationCourante.setPredicat(predicat);
 		annotationCourante.incrementNbChar(nbCharLigneCourante);
 		annotationCourante.setNbLine(1);
 		setupAnnotationCouranteVariablesAvecRegex("<|>|<=|>=|==|&&");
 	}
 	/*
-	 * récupérer la liste des variables d'un VP et les mettre dans annotation courante
+	 * initialiser la liste des variables de l'annotation à partir de son prédicat.
 	 */
 	public static void setupAnnotationCouranteVariablesAvecRegex(String regex) {
 		String[] vars = annotationCourante.getPredicat().split(regex);
@@ -142,28 +140,29 @@ public class Application {
 		annotationCourante.setVariables(lstVar);
 	}
 
-	public static void triEtExtractionAnnotationsUnique() {
-		assert (annotationsUniques != null);
-		for (Annotation annotationItt : annotations) {
-			boolean present = false;
-			for (Annotation annotationItt2 : annotationsUniques) {
-				if (annotationItt.equals(annotationItt2)) {
-					present = true;
-					annotationItt2.incrementNbChar(annotationItt.getNbChar());
-					annotationItt2.incrementNbLigne(annotationItt.getNbLine());
-				}
-			}
-			if (false == present) {
-				annotationsUniques.add(FabricationAnnotation.makeAnnotation(annotationItt));
-			}
-		}
-	}
-
 	private static void affichageAnnotations(List<Annotation>lstAnnotations) {
 		for (Annotation annotation : lstAnnotations) {
 			System.out.println(annotation);
 		}
 	}
-
+/*******************************Lecture dossier***********************************************/
+	public static void findAllFilesInFolder(File folder) {
+		for (File file : folder.listFiles()) {
+			if (!file.isDirectory()) {
+				if(file.getName().substring(file.getName().length()-5, file.getName().length()).equals(".java")) {
+					System.out.println("-------------------------"+file.getName()+"-----------------------------");
+					annotations = new ArrayList<Annotation>();
+					annotationCourante = new Annotation();
+					pileAnnotation = new Stack<Annotation>();
+					inputFile=file.getAbsolutePath();
+					readFile();
+					creerArborescenceDesAnnotations(contenuFichier, 0, 0, 0);
+					affichageAnnotations(annotations);
+				}	
+			} else {
+				findAllFilesInFolder(file);
+			}
+		}
+	}
 	
 }

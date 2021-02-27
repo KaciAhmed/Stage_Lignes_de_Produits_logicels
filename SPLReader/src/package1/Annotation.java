@@ -1,10 +1,11 @@
 package package1;
+
 import java.util.ArrayList;
 import java.util.List;
 
 class Annotation {
 
-	static final int NUMERO_NON_DEFINI = -1;
+	static final int NUMERO_NON_DEFINI = 0;
 	static final String FICHIER_NON_DEFINI = "non defini";
 	private static final String PREDICAT_NON_DEFINI = "non defini";
 	private String nomDuFichier;
@@ -100,14 +101,15 @@ class Annotation {
 		this.nbChar = nbChar;
 	}
 
-/*	@Override
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((predicat == null) ? 0 : predicat.hashCode());
 		return result;
 	}
-	*/
+	
 
 	@Override
 	public boolean equals(Object obj) {
