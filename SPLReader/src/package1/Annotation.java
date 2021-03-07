@@ -31,25 +31,7 @@ public abstract class Annotation {
 		this.nombreDeCaractere += nombreDeCaratere;
 	}
 	
-	public String getFormule() {
-		return this.proposition.getProposition();
-	}
 	
-	public List<Variable> getVariables(){
-		return this.proposition.getVariables();
-	}
-	
-	public void parserProposition() {
-		if(this.proposition.estParser()) {
-			return;
-		}else {
-			this.proposition.parserProposition();
-		}
-	}
-	
-	public boolean estParser() {
-		return this.proposition.estParser();
-	}
 	
 	public String getNomDeFichier() {
 		return nomDeFichier;
@@ -107,11 +89,5 @@ public abstract class Annotation {
 		this.proposition = proposition;
 	}
 
-	
-	@Override
-	public String toString() {
-		return "Annotation [nomDeFichier=" + nomDeFichier + ", debutDeLigne=" + debutDeLigne + ", nombreDeLigne="
-				+ nombreDeLigne + ", nombreDeCaractere=" + nombreDeCaractere + ", degre=" + degre + ", proposition="
-				+ proposition + ", getVariables()=" + getVariables() + "]";
-	}
+	public abstract void afficherArborescence();
 }

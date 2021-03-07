@@ -9,30 +9,20 @@ public class AnnotationComposer extends Annotation {
 			int degre, CodeVariant codeVariant, Proposition proposition) {
 		super(nomDeFichier, debutDeLigne, nombreDeLigne, nombreDeCaractere, degre, codeVariant, proposition);
 	}
-	
-	@Override
-	public int getNombreDeLigne() {
-		int sum = 0;
-		for (Annotation annotation : annotationsComposer) {
-			sum =+ annotation.getNombreDeLigne();
-		}
-		return sum;
-	}
-
-	@Override
-	public int getNombreDeCaractere() {
-		int sum = 0;
-		for (Annotation annotation : annotationsComposer) {
-			sum += annotation.getNombreDeCaractere();
-		}
-		return sum;
-	}
 
 	@Override
 	public String toString() {
-		return "AnnotationComposer [getNombreDeLigne()=" + getNombreDeLigne() + ", getNombreDeCaractere()="
-				+ getNombreDeCaractere() + ", getVariables()=" + getVariables() + ", getNomDeFichier()="
-				+ getNomDeFichier() + ", getDebutDeLigne()=" + getDebutDeLigne() + ", getDegre()=" + getDegre()
-				+ ", getProposition()=" + getProposition() + "]";
+		return "AnnotationComposer [\n Nom du Fichier= "+ getNomDeFichier() +",\n Proposition= " + getProposition()+
+				",\n DebutDeLigne= " + getDebutDeLigne()+",\n NombreDeLigne = " + getNombreDeLigne() + ",\n NombreDeCaractère= "
+				+ getNombreDeCaractere() + ",\n Degre = " + getDegre()+ "]";
 	}	
+	
+	public void afficherArborescence() {
+		System.out.println(this.toString());
+		for (Annotation annotation : annotationsComposer) {
+			System.out.println("\n");
+			System.out.println("\t");
+			annotation.afficherArborescence();
+		}
+	}
 }

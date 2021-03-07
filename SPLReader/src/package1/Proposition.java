@@ -1,45 +1,83 @@
 package package1;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Proposition {
-	private String proposition;
-	private List<Variable> variables;
-
-	public Proposition(String proposition, List<Variable> variables) {
+	private String formule;
+	private List<Predicat> predicats;
+	
+	public Proposition() {
 		super();
-		this.proposition = proposition;
-		this.variables = variables;
-	}
-
-	public String getProposition() {
-		return proposition;
-	}
-
-	public void setProposition(String proposition) {
-		this.proposition = proposition;
+		predicats=new ArrayList<>();
 	}
 	
-	public List<Variable> getVariables() {
-		return variables;
+	public String getFormule() {
+		return formule;
 	}
 
-	public void setVariables(List<Variable> variables) {
-		this.variables = variables;
+	public void setFormule(String formule) {
+		this.formule = formule;
 	}
 
-	public void parserProposition() {
-		// TODO
+	public List<Predicat> getPredicats() {
+		return predicats;
 	}
-	
-	public boolean estParser() {
-		// TODO
-		return false;
+
+	public void setPredicats(List<Predicat> predicats) {
+		this.predicats = predicats;
+	}
+
+	public void parserFormule(String ligne) {
+		String patternIF = "#if";
+		String regexSeparateur = "<|>|<=|>=|==|&&|\\|\\|";
+		int positionIF = ligne.indexOf(patternIF);
+		positionIF += patternIF.length();
+		String contenuFormule = ligne.substring(positionIF);
+		this.setFormule(contenuFormule.trim());
+		String[] tabPredicats = formule.split(regexSeparateur);
+		Predicat predicat;
+		for (int i = 0; i < tabPredicats.length; i++) {
+			predicat = new Predicat(tabPredicats[i].trim());
+			predicats.add(predicat);
+		}
 	}
 
 	@Override
 	public String toString() {
-		return "Proposition [proposition=" + proposition + ", variables=" + variables + ", getVariables()="
-				+ getVariables() + "]";
+		return "Proposition [formule= " + formule + ", predicats= " + predicats + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((formule == null) ? 0 : formule.hashCode());
+		result = prime * result + ((predicats == null) ? 0 : predicats.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Proposition other = (Proposition) obj;
+		if (formule == null) {
+			if (other.formule != null)
+				return false;
+		} else if (!formule.equals(other.formule))
+			return false;
+		if (predicats == null) {
+			if (other.predicats != null)
+				return false;
+		} else if (!predicats.equals(other.predicats))
+			return false;
+		return true;
 	}	
+	
+	
 }

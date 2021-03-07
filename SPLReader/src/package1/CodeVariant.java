@@ -18,8 +18,4 @@ public class CodeVariant {
 		this.ligneDeCode = ligneDeCode;
 	}
 
-	@Override
-	public String toString() {
-		return "CodeVariant [ligneDeCode=" + ligneDeCode + "]";
-	}
 }

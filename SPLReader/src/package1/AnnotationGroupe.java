@@ -1,17 +1,27 @@
 package package1;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AnnotationGroupe {
 	private List<Annotation> annotations;
+	private Proposition proposition;
 	
-	public List<Proposition> getPropositionEquivalent(){
-		// TODO
-		return null;
+	
+	
+	public AnnotationGroupe(Proposition proposition) {
+		super();
+		this.annotations = new ArrayList<Annotation>();
+		this.proposition = proposition;
+	}
+
+	public boolean estPropositionEquivalente(Proposition prop){
+		return this.proposition.equals(prop);
 	}
 
 	public void ajouterAnnotation(Annotation annotation) {
-		// TODO
-		this.annotations.add(annotation);
+		if(estPropositionEquivalente(annotation.getProposition())) {
+			this.annotations.add(annotation);
+		}
 	}
 }
