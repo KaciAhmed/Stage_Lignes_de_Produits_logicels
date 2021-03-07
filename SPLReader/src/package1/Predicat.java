@@ -9,7 +9,7 @@ public class Predicat {
 	}
 
 	public String getNom() {
-		return nom;
+		return this.nom;
 	}
 
 	public void setNom(String nom) {
@@ -18,32 +18,37 @@ public class Predicat {
 
 	@Override
 	public String toString() {
-		return "[ "+nom + "]";
+		return "[ " + this.nom + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((nom == null) ? 0 : nom.hashCode());
+		result = (prime * result) + ((this.nom == null) ? 0 : this.nom.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		Predicat other = (Predicat) obj;
-		if (nom == null) {
-			if (other.nom != null)
+		if (this.nom == null) {
+			if (other.nom != null) {
 				return false;
-		} else if (!nom.equals(other.nom))
+			}
+		} else if (!this.nom.equals(other.nom)) {
 			return false;
+		}
 		return true;
 	}
-	
+
 }

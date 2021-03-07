@@ -10,7 +10,7 @@ public abstract class Annotation {
 	private int degre;
 	private CodeVariant codeVariant;
 	private Proposition proposition;
-	
+
 	public Annotation(String nomDeFichier, int debutDeLigne, int nombreDeLigne, int nombreDeCaractere, int degre,
 			CodeVariant codeVariant, Proposition proposition) {
 		super();
@@ -26,15 +26,13 @@ public abstract class Annotation {
 	public void incrementNombreDeLigne() {
 		this.nombreDeLigne += 1;
 	}
-	
+
 	public void ajouterNombreDeCaractere(int nombreDeCaratere) {
 		this.nombreDeCaractere += nombreDeCaratere;
 	}
-	
-	
-	
+
 	public String getNomDeFichier() {
-		return nomDeFichier;
+		return this.nomDeFichier;
 	}
 
 	public void setNomDeFichier(String nomDeFichier) {
@@ -42,7 +40,7 @@ public abstract class Annotation {
 	}
 
 	public int getDebutDeLigne() {
-		return debutDeLigne;
+		return this.debutDeLigne;
 	}
 
 	public void setDebutDeLigne(int debutDeLigne) {
@@ -50,7 +48,7 @@ public abstract class Annotation {
 	}
 
 	public int getNombreDeLigne() {
-		return nombreDeLigne;
+		return this.nombreDeLigne;
 	}
 
 	public void setNombreDeLigne(int nombreDeLigne) {
@@ -58,7 +56,7 @@ public abstract class Annotation {
 	}
 
 	public int getNombreDeCaractere() {
-		return nombreDeCaractere;
+		return this.nombreDeCaractere;
 	}
 
 	public void setNombreDeCaractere(int nombreDeCaractere) {
@@ -66,7 +64,7 @@ public abstract class Annotation {
 	}
 
 	public int getDegre() {
-		return degre;
+		return this.degre;
 	}
 
 	public void setDegre(int degre) {
@@ -74,7 +72,7 @@ public abstract class Annotation {
 	}
 
 	public CodeVariant getCodeVariant() {
-		return codeVariant;
+		return this.codeVariant;
 	}
 
 	public void setCodeVariant(CodeVariant codeVariant) {
@@ -82,7 +80,7 @@ public abstract class Annotation {
 	}
 
 	public Proposition getProposition() {
-		return proposition;
+		return this.proposition;
 	}
 
 	public void setProposition(Proposition proposition) {
@@ -90,4 +88,17 @@ public abstract class Annotation {
 	}
 
 	public abstract void afficherArborescence();
+
+	public void ajouterEnfant(Annotation annotation) {
+		throw new UnsupportedOperationException();
+	}
+
+	public List<Annotation> getAnnotationsEnfant() {
+		throw new UnsupportedOperationException();
+	}
+
+	public void setAnnotationsEnfant(List<Annotation> annotation) {
+		throw new UnsupportedOperationException();
+	};
+
 }

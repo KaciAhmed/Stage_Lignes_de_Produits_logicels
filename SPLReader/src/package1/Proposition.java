@@ -6,14 +6,14 @@ import java.util.List;
 public class Proposition {
 	private String formule;
 	private List<Predicat> predicats;
-	
+
 	public Proposition() {
 		super();
-		predicats=new ArrayList<>();
+		this.predicats = new ArrayList<>();
 	}
-	
+
 	public String getFormule() {
-		return formule;
+		return this.formule;
 	}
 
 	public void setFormule(String formule) {
@@ -21,7 +21,7 @@ public class Proposition {
 	}
 
 	public List<Predicat> getPredicats() {
-		return predicats;
+		return this.predicats;
 	}
 
 	public void setPredicats(List<Predicat> predicats) {
@@ -35,49 +35,55 @@ public class Proposition {
 		positionIF += patternIF.length();
 		String contenuFormule = ligne.substring(positionIF);
 		this.setFormule(contenuFormule.trim());
-		String[] tabPredicats = formule.split(regexSeparateur);
+		String[] tabPredicats = this.formule.split(regexSeparateur);
 		Predicat predicat;
 		for (int i = 0; i < tabPredicats.length; i++) {
 			predicat = new Predicat(tabPredicats[i].trim());
-			predicats.add(predicat);
+			this.predicats.add(predicat);
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "Proposition [formule= " + formule + ", predicats= " + predicats + "]";
+		return "Proposition [formule= " + this.formule + ", predicats= " + this.predicats + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((formule == null) ? 0 : formule.hashCode());
-		result = prime * result + ((predicats == null) ? 0 : predicats.hashCode());
+		result = (prime * result) + ((this.formule == null) ? 0 : this.formule.hashCode());
+		result = (prime * result) + ((this.predicats == null) ? 0 : this.predicats.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		Proposition other = (Proposition) obj;
-		if (formule == null) {
-			if (other.formule != null)
+		if (this.formule == null) {
+			if (other.formule != null) {
 				return false;
-		} else if (!formule.equals(other.formule))
+			}
+		} else if (!this.formule.equals(other.formule)) {
 			return false;
-		if (predicats == null) {
-			if (other.predicats != null)
+		}
+		if (this.predicats == null) {
+			if (other.predicats != null) {
 				return false;
-		} else if (!predicats.equals(other.predicats))
+			}
+		} else if (!this.predicats.equals(other.predicats)) {
 			return false;
+		}
 		return true;
-	}	
-	
-	
+	}
+
 }
