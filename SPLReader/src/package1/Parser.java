@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+
 public class Parser {
 	public static final String REGEX_TAB = "\\t";
 	public static final String STRING_VIDE = "";
@@ -17,8 +21,9 @@ public class Parser {
 
 	public static void main(String[] args) {
 		String inputDirectory = STRING_VIDE;
-		String classpath = System.getProperty("java.class.path");
-		String outputFile = classpath + File.separator + "output" + Instant.now().getEpochSecond() + ".xml";
+		String outputFile = "output" + Instant.now().getEpochSecond() + ".xml";
+		List<Annotation> annotations;
+
 		if (args.length > 0) {
 			inputDirectory = args[0];
 			if (args.length > 1) {
@@ -28,7 +33,9 @@ public class Parser {
 			System.out.println("Usage <path/to/code/> <optional/path/to/result.xml>");
 		}
 		Parser parseur = new Parser();
-		parseur.parser(inputDirectory);
+		annotations = parseur.parser(inputDirectory);
+		AnnotationsWrapper annotationsWrapper = new AnnotationsWrapper(annotations);
+		jaxbObjectToXML(annotationsWrapper, outputFile);
 	}
 
 	public List<String> lireFichier(String nomDeFichier) {
@@ -49,9 +56,16 @@ public class Parser {
 		return contenuFichier;
 	}
 
-	public void lireDossier(File dossier) {
+	public void concatenerListes(List<Annotation> lst1, List<Annotation> lst2) {
+		for (Annotation annotation : lst2) {
+			lst1.add(annotation);
+		}
+	}
+
+	public List<Annotation> lireDossier(File dossier) {
 		String nomDeFichier;
-		List<Annotation> annotations;
+		List<Annotation> annotations = new ArrayList<>();
+		List<Annotation> annotationsFinale = new ArrayList<>();
 		Annotation annotationCourante;
 		Stack<Annotation> pileAnnotation;
 		for (File contenuDossier : dossier.listFiles()) {
@@ -68,14 +82,14 @@ public class Parser {
 					List<String> lignesFichier = lireFichier(nomDeFichier);
 					creerArborescenceDesAnnotations(nomDeFichier, lignesFichier, annotations, pileAnnotation,
 							annotationCourante, 0, 0, 0);
-					List<Annotation> annotationsProv = simplifierAnnotations(annotations);
-					afficherAnnotations(annotationsProv);
-
+					List<Annotation> annotationProv = simplifierAnnotations(annotations);
+					concatenerListes(annotationsFinale, annotationProv);
 				}
 			} else {
-				lireDossier(contenuDossier);
+				concatenerListes(annotationsFinale, lireDossier(contenuDossier));
 			}
 		}
+		return annotationsFinale;
 	}
 
 	private void creerArborescenceDesAnnotations(String nomDeFichier, List<String> lignesFichier,
@@ -189,9 +203,10 @@ public class Parser {
 		return lst;
 	}
 
-	public void parser(String inputDirectory) {
+	public List<Annotation> parser(String inputDirectory) {
 		File dossier = new File(inputDirectory);
-		lireDossier(dossier);
+		List<Annotation> annotationFinale = lireDossier(dossier);
+		return annotationFinale;
 	}
 
 	public static Proposition creerProposition(String ligne) {
@@ -200,4 +215,17 @@ public class Parser {
 		return proposition;
 	}
 
+	private static void jaxbObjectToXML(AnnotationsWrapper annotationsWrapper, String outputFileName) {
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(AnnotationsWrapper.class);
+			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+
+			jaxbMarshaller.marshal(annotationsWrapper, new File(outputFileName));
+
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+	}
 }

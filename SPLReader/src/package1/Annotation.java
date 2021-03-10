@@ -1,15 +1,35 @@
 package package1;
 
+import java.io.Serializable;
 import java.util.List;
 
-public abstract class Annotation {
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlSeeAlso({ AnnotationSimple.class, AnnotationComposer.class })
+@XmlRootElement(name = "annotation")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlTransient
+@XmlType(propOrder = { "nomDeFichier", "proposition", "debutDeLigne", "nombreDeLigne", "nombreDeCaractere", "degre" })
+public abstract class Annotation implements Serializable {
+
 	private String nomDeFichier;
 	private int debutDeLigne;
 	private int nombreDeLigne;
 	private int nombreDeCaractere;
 	private int degre;
+	@XmlTransient
 	private CodeVariant codeVariant;
 	private Proposition proposition;
+
+	public Annotation() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	public Annotation(String nomDeFichier, int debutDeLigne, int nombreDeLigne, int nombreDeCaractere, int degre,
 			CodeVariant codeVariant, Proposition proposition) {

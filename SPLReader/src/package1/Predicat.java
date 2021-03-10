@@ -1,7 +1,20 @@
 package package1;
 
-public class Predicat {
+import java.io.Serializable;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "predicat")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Predicat implements Serializable {
 	private String nom;
+
+	public Predicat() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	public Predicat(String nom) {
 		super();

@@ -1,9 +1,26 @@
 package package1;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class CodeVariant {
-	private List<String> ligneDeCode;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "codeVariant")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class CodeVariant implements Serializable {
+
+	@XmlElementWrapper(name = "lignes")
+	@XmlElement(name = "ligne")
+	private List<String> ligneDeCode = null;
+
+	public CodeVariant() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	public CodeVariant(List<String> ligneDeCode) {
 		super();
@@ -17,5 +34,4 @@ public class CodeVariant {
 	public void setLigneDeCode(List<String> ligneDeCode) {
 		this.ligneDeCode = ligneDeCode;
 	}
-
 }
