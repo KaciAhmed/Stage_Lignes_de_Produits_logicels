@@ -119,6 +119,10 @@ public abstract class Annotation implements Serializable {
 
 	public void setAnnotationsEnfant(List<Annotation> annotation) {
 		throw new UnsupportedOperationException();
-	};
+	}
+
+	public void ajouterLigneDeCodeVariant(String ligne) {
+		this.codeVariant.ajouter(ligne);
+	}
 
 }

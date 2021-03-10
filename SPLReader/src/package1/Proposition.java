@@ -39,8 +39,8 @@ public class Proposition {
 	}
 
 	public void parserFormule(String ligne) {
-		String patternIF = "#if";
-		String regexSeparateur = "<|>|<=|>=|==|&&|\\|\\|";
+		final String patternIF = "#if";
+		final String regexSeparateur = "<|>|<=|>=|==|&&|\\|\\|";
 		int positionIF = ligne.indexOf(patternIF);
 		positionIF += patternIF.length();
 		String contenuFormule = ligne.substring(positionIF);

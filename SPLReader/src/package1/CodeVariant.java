@@ -34,4 +34,8 @@ public class CodeVariant implements Serializable {
 	public void setLigneDeCode(List<String> ligneDeCode) {
 		this.ligneDeCode = ligneDeCode;
 	}
+
+	public void ajouter(String ligne) {
+		this.ligneDeCode.add(ligne);
+	}
 }

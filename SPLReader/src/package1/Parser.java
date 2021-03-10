@@ -21,24 +21,80 @@ public class Parser {
 
 	public static void main(String[] args) {
 		String inputDirectory = STRING_VIDE;
-		String outputFile = "output" + Instant.now().getEpochSecond() + ".xml";
+		String outputFile = "";
 		List<Annotation> annotations;
 
 		if (args.length > 0) {
 			inputDirectory = args[0];
 			if (args.length > 1) {
 				outputFile = args[1];
+			}else {
+				outputFile += "out" + File.separator + "output_";
 			}
 		} else {
 			System.out.println("Usage <path/to/code/> <optional/path/to/result.xml>");
 		}
+		
+		outputFile += Instant.now().getEpochSecond() + ".xml";
+		
 		Parser parseur = new Parser();
 		annotations = parseur.parser(inputDirectory);
 		AnnotationsWrapper annotationsWrapper = new AnnotationsWrapper(annotations);
+		annotationsWrapper.setNomFichierInput(inputDirectory);
 		jaxbObjectToXML(annotationsWrapper, outputFile);
 	}
 
-	public List<String> lireFichier(String nomDeFichier) {
+	public List<Annotation> parser(String inputDirectory) {
+		File dossier = new File(inputDirectory);
+		List<Annotation> annotationFinale = lireDossier(dossier);
+		return annotationFinale;
+	}
+
+	private List<Annotation> lireDossier(File dossier) {
+		String nomDeFichier;
+		List<Annotation> annotations = new ArrayList<>();
+		List<Annotation> annotationsCalculer = new ArrayList<>();
+		List<String> lignesFichier = null;
+		Annotation annotationCourante;
+		Stack<Annotation> pileAnnotation;
+		List<Annotation> annotationsPrecalculer = null;
+		final int indiceCurseurDeLigne = 0;
+		final int degre = 0;
+
+		for (File fichier : dossier.listFiles()) {
+			if (!fichier.isDirectory()) {
+				if (estFichierVoulu(fichier)) {
+					System.out
+							.println("-------------------------" + fichier.getName() + "-----------------------------");
+					nomDeFichier = fichier.getAbsolutePath();
+					annotations = new ArrayList<Annotation>();
+					pileAnnotation = new Stack<Annotation>();
+					annotationCourante = null;
+					lignesFichier = lireFichier(nomDeFichier);
+					creerArborescenceDesAnnotations(nomDeFichier, lignesFichier, annotations, pileAnnotation,
+							annotationCourante, degre, indiceCurseurDeLigne);
+					annotationsPrecalculer = simplifierAnnotations(annotations);
+					concatenerListes(annotationsCalculer, annotationsPrecalculer);
+				}
+			} else {
+				annotationsPrecalculer = lireDossier(fichier);
+				concatenerListes(annotationsCalculer, annotationsPrecalculer);
+			}
+		}
+		return annotationsCalculer;
+	}
+
+	private boolean estFichierVoulu(File fichier) {
+
+		final String extensionFichierVoulu = ".java";
+		final int indiceFinFichier = fichier.getName().length();
+		final int indiceExtensionFichier = indiceFinFichier - extensionFichierVoulu.length();
+		final String fichierExtension = fichier.getName().substring(indiceExtensionFichier, indiceFinFichier);
+
+		return fichierExtension.equals(extensionFichierVoulu);
+	}
+
+	private List<String> lireFichier(String nomDeFichier) {
 		List<String> contenuFichier = new ArrayList<String>();
 		try {
 			FileReader fileReader = new FileReader(nomDeFichier);
@@ -56,45 +112,15 @@ public class Parser {
 		return contenuFichier;
 	}
 
-	public void concatenerListes(List<Annotation> lst1, List<Annotation> lst2) {
+	private void concatenerListes(List<Annotation> lst1, List<Annotation> lst2) {
 		for (Annotation annotation : lst2) {
 			lst1.add(annotation);
 		}
 	}
 
-	public List<Annotation> lireDossier(File dossier) {
-		String nomDeFichier;
-		List<Annotation> annotations = new ArrayList<>();
-		List<Annotation> annotationsFinale = new ArrayList<>();
-		Annotation annotationCourante;
-		Stack<Annotation> pileAnnotation;
-		for (File contenuDossier : dossier.listFiles()) {
-			if (!contenuDossier.isDirectory()) {
-				if (contenuDossier.getName()
-						.substring(contenuDossier.getName().length() - 5, contenuDossier.getName().length())
-						.equals(".java")) {
-					System.out.println(
-							"-------------------------" + contenuDossier.getName() + "-----------------------------");
-					annotations = new ArrayList<Annotation>();
-					pileAnnotation = new Stack<Annotation>();
-					nomDeFichier = contenuDossier.getAbsolutePath();
-					annotationCourante = null;
-					List<String> lignesFichier = lireFichier(nomDeFichier);
-					creerArborescenceDesAnnotations(nomDeFichier, lignesFichier, annotations, pileAnnotation,
-							annotationCourante, 0, 0, 0);
-					List<Annotation> annotationProv = simplifierAnnotations(annotations);
-					concatenerListes(annotationsFinale, annotationProv);
-				}
-			} else {
-				concatenerListes(annotationsFinale, lireDossier(contenuDossier));
-			}
-		}
-		return annotationsFinale;
-	}
-
 	private void creerArborescenceDesAnnotations(String nomDeFichier, List<String> lignesFichier,
 			List<Annotation> annotations, Stack<Annotation> pileAnnotation, Annotation annotationCourante, int degre,
-			int indiceCurseurDeLigne, int nbLigneTotal) {
+			int indiceCurseurDeLigne) {
 		if (estCurseurFin(lignesFichier, indiceCurseurDeLigne)) {
 			System.out.println("Tout est visite");
 		} else {
@@ -104,17 +130,17 @@ public class Parser {
 			String[] motsCles = ligneCourante.trim().split(ESPACE);
 			if (estDebutAnnotation(motsCles)) {
 				miseAjourPileAnnotation(pileAnnotation, nbCharLigneCourante);
-				nbLigneTotal++;
 				degre++;
 				indiceCurseurDeLigne++;
-				annotationCourante = setupAnnotation(nomDeFichier, ligneCourante, degre, indiceCurseurDeLigne,
+				annotationCourante = creerAnnotation(nomDeFichier, ligneCourante, degre, indiceCurseurDeLigne,
 						nbCharLigneCourante);
 				pileAnnotation.push(annotationCourante);
 				creerArborescenceDesAnnotations(nomDeFichier, lignesFichier, annotations, pileAnnotation,
-						annotationCourante, degre, indiceCurseurDeLigne, nbLigneTotal);
+						annotationCourante, degre, indiceCurseurDeLigne);
 			} else if (estFinAnnotation(motsCles)) {
 				miseAjourPileAnnotation(pileAnnotation, nbCharLigneCourante);
 				annotationCourante = pileAnnotation.pop();
+				annotationCourante.ajouterLigneDeCodeVariant(ligneCourante);
 				if (!pileAnnotation.isEmpty()) {
 					Annotation annotationParent = pileAnnotation.pop();
 					annotationParent.ajouterEnfant(annotationCourante);
@@ -124,15 +150,13 @@ public class Parser {
 				}
 				degre--;
 				indiceCurseurDeLigne++;
-				nbLigneTotal++;
 				creerArborescenceDesAnnotations(nomDeFichier, lignesFichier, annotations, pileAnnotation,
-						annotationCourante, degre, indiceCurseurDeLigne, nbLigneTotal);
+						annotationCourante, degre, indiceCurseurDeLigne);
 			} else if (estMillieuAnnotation(motsCles)) {
 				miseAjourPileAnnotation(pileAnnotation, nbCharLigneCourante);
 				indiceCurseurDeLigne++;
-				nbLigneTotal++;
 				creerArborescenceDesAnnotations(nomDeFichier, lignesFichier, annotations, pileAnnotation,
-						annotationCourante, degre, indiceCurseurDeLigne, nbLigneTotal);
+						annotationCourante, degre, indiceCurseurDeLigne);
 			}
 		}
 	}
@@ -142,12 +166,12 @@ public class Parser {
 	}
 
 	private boolean estDebutAnnotation(String[] motsCles) {
-		String debutAnnotation = "//#if";
+		final String debutAnnotation = "//#if";
 		return motsCles[0].contains(debutAnnotation);
 	}
 
 	private boolean estFinAnnotation(String[] motsCles) {
-		String finAnnotation = "//#endif";
+		final String finAnnotation = "//#endif";
 		return motsCles[0].contains(finAnnotation);
 	}
 
@@ -166,7 +190,7 @@ public class Parser {
 		}
 	}
 
-	private Annotation setupAnnotation(String nomDeFichier, String ligne, int degre, int indice,
+	private Annotation creerAnnotation(String nomDeFichier, String ligne, int degre, int indice,
 			int nbCharLigneCourante) {
 		final int NB_LIGNE_DEBUT = 1;
 		List<String> lst = new ArrayList<>();
@@ -177,55 +201,62 @@ public class Parser {
 				nbCharLigneCourante, degre, codeVariant, proposition);
 		return annotationCourante;
 	}
-
-	public void afficherAnnotations(List<Annotation> lstAnnotations) {
-		for (Annotation annotation : lstAnnotations) {
-			annotation.afficherArborescence();
-		}
-	}
-
-	public List<Annotation> simplifierAnnotations(List<Annotation> lstAnnotations) {
-		List<Annotation> lst = new ArrayList<Annotation>();
-		Annotation temp;
-		for (int i = 0; i < lstAnnotations.size(); i++) {
-			if (lstAnnotations.get(i).getAnnotationsEnfant().isEmpty()) {
-				temp = new AnnotationSimple(lstAnnotations.get(i).getNomDeFichier(),
-						lstAnnotations.get(i).getDebutDeLigne(), lstAnnotations.get(i).getNombreDeLigne(),
-						lstAnnotations.get(i).getNombreDeCaractere(), lstAnnotations.get(i).getDegre(),
-						lstAnnotations.get(i).getCodeVariant(), lstAnnotations.get(i).getProposition());
-				lst.add(temp);
-			} else {
-				lst.add(lstAnnotations.get(i));
-				lstAnnotations.get(i)
-						.setAnnotationsEnfant(simplifierAnnotations(lstAnnotations.get(i).getAnnotationsEnfant()));
-			}
-		}
-		return lst;
-	}
-
-	public List<Annotation> parser(String inputDirectory) {
-		File dossier = new File(inputDirectory);
-		List<Annotation> annotationFinale = lireDossier(dossier);
-		return annotationFinale;
-	}
-
-	public static Proposition creerProposition(String ligne) {
+	
+	private static Proposition creerProposition(String ligne) {
 		Proposition proposition = new Proposition();
 		proposition.parserFormule(ligne);
 		return proposition;
 	}
 
+	private List<Annotation> simplifierAnnotations(List<Annotation> lstAnnotations) {
+		List<Annotation> lst = new ArrayList<Annotation>();
+		Annotation annotationComposer = null;
+		Annotation temp;
+		
+		for (int i = 0; i < lstAnnotations.size(); i++) {
+			annotationComposer = lstAnnotations.get(i);
+			Annotation annotationSimplifier = simplifierAnnotation(annotationComposer);
+			lst.add(annotationSimplifier);
+		}
+		return lst;
+	}
+
+	private Annotation simplifierAnnotation(Annotation annotationComposer) {
+		Annotation simplification = null;
+		List<Annotation> annotationsEnfantCourant = annotationComposer.getAnnotationsEnfant();
+		if (annotationsEnfantCourant.isEmpty()) {
+			simplification = creerAnnotationSimple(annotationComposer);
+		} else {
+			List<Annotation> annotationsEnfantSimplifier = simplifierAnnotations(annotationsEnfantCourant);
+			annotationComposer.setAnnotationsEnfant(annotationsEnfantSimplifier);
+		}
+		return simplification;
+	}
+
+	private AnnotationSimple creerAnnotationSimple(Annotation annotationComposer) {
+		return new AnnotationSimple(annotationComposer.getNomDeFichier(),
+				annotationComposer.getDebutDeLigne(), annotationComposer.getNombreDeLigne(),
+				annotationComposer.getNombreDeCaractere(), annotationComposer.getDegre(),
+				annotationComposer.getCodeVariant(), annotationComposer.getProposition());
+	}
+	
 	private static void jaxbObjectToXML(AnnotationsWrapper annotationsWrapper, String outputFileName) {
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(AnnotationsWrapper.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-
+			
 			jaxbMarshaller.marshal(annotationsWrapper, new File(outputFileName));
 
 		} catch (JAXBException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void afficherAnnotations(List<Annotation> lstAnnotations) {
+		for (Annotation annotation : lstAnnotations) {
+			annotation.afficherArborescence();
 		}
 	}
 }
