@@ -22,6 +22,9 @@ public class Parser {
 	public static void main(String[] args) {
 		String inputDirectory = STRING_VIDE;
 		String outputFile = "";
+		final long timestamp = Instant.now().getEpochSecond();
+		final String dossierParDefaut = "out" + File.separator;
+		final String nomParDefaut = "output_";
 		List<Annotation> annotations;
 
 		if (args.length > 0) {
@@ -29,13 +32,14 @@ public class Parser {
 			if (args.length > 1) {
 				outputFile = args[1];
 			}else {
-				outputFile += "out" + File.separator + "output_";
+				outputFile = dossierParDefaut + nomParDefaut;
 			}
 		} else {
 			System.out.println("Usage <path/to/code/> <optional/path/to/result.xml>");
 		}
 		
-		outputFile += Instant.now().getEpochSecond() + ".xml";
+		
+		outputFile += timestamp + ".xml";
 		
 		Parser parseur = new Parser();
 		annotations = parseur.parser(inputDirectory);
