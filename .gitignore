@@ -74,6 +74,7 @@ local.properties
 
 # Annotation Processing
 .apt_generated/
+*out*
 
 # Scala IDE specific (Scala & Java development for Eclipse)
 .cache-main

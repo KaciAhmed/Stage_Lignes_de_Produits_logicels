@@ -1,131 +1,128 @@
 package package1;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 
-class Annotation {
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 
-	static final int NUMERO_NON_DEFINI = 0;
-	static final String FICHIER_NON_DEFINI = "non defini";
-	private static final String PREDICAT_NON_DEFINI = "non defini";
-	private String nomDuFichier;
-	private String predicat;
-	private List<String> variables;
+@XmlSeeAlso({ AnnotationSimple.class, AnnotationComposer.class })
+@XmlRootElement(name = "annotation")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlTransient
+@XmlType(propOrder = { "nomDeFichier", "proposition", "debutDeLigne", "nombreDeLigne", "nombreDeCaractere", "degre" })
+public abstract class Annotation implements Serializable {
+
+	private String nomDeFichier;
 	private int debutDeLigne;
-	private int nbLigne;
+	private int nombreDeLigne;
+	private int nombreDeCaractere;
 	private int degre;
-	private int nbChar;
+	@XmlTransient
+	private CodeVariant codeVariant;
+	private Proposition proposition;
 
-	public static String ESPACE = " ";
-	public static String DEBUT_ANNOTATION = "//#if";
-	public static String CHANGEMENT_ANNOTATION = "//#elif";
-	public static String FIN_ANNOTATION = "//#endif";
-	public static final String REGEX_TAB = "\\t";
-	public static final String STRING_VIDE = "";
-
-	public Annotation () {
-		this.nomDuFichier = FICHIER_NON_DEFINI;
-		this.predicat = PREDICAT_NON_DEFINI;
-		this.variables = new ArrayList<String>();
-		this.debutDeLigne = NUMERO_NON_DEFINI;
-		this.nbLigne = NUMERO_NON_DEFINI;
-		this.degre = NUMERO_NON_DEFINI;
-		this.nbChar = NUMERO_NON_DEFINI;
+	public Annotation() {
+		super();
+		// TODO Auto-generated constructor stub
 	}
 
-	public String toString(){
-		return "ANNOTATION {" +
-				(nomDuFichier.equals(FICHIER_NON_DEFINI) ? STRING_VIDE : "\n\tFICHIER= " + nomDuFichier) +
-				"\n\tPREDICAT= " + predicat +
-				"\n\tVARIABLES= " + variables +
-				(debutDeLigne == NUMERO_NON_DEFINI? STRING_VIDE : "\n\tLIGNE_DE_DEBUT= " + debutDeLigne) +
-				"\n\tNB_LIGNE= " + nbLigne +
-				"\n\tDEGRE= " + degre +
-				"\n\tNB_CHAR= " + nbChar +
-				"\n}";
+	public Annotation(String nomDeFichier, int debutDeLigne, int nombreDeLigne, int nombreDeCaractere, int degre,
+			CodeVariant codeVariant, Proposition proposition) {
+		super();
+		this.nomDeFichier = nomDeFichier;
+		this.debutDeLigne = debutDeLigne;
+		this.nombreDeLigne = nombreDeLigne;
+		this.nombreDeCaractere = nombreDeCaractere;
+		this.degre = degre;
+		this.codeVariant = codeVariant;
+		this.proposition = proposition;
 	}
 
-	public void incrementNbLigne(){
-		incrementNbLigne(1);
+	public void incrementNombreDeLigne() {
+		this.nombreDeLigne += 1;
 	}
-	
-	public void incrementNbLigne(int i) {
-		this.nbLigne += i;
+
+	public void ajouterNombreDeCaractere(int nombreDeCaratere) {
+		this.nombreDeCaractere += nombreDeCaratere;
 	}
-	
-	public void incrementNbChar(int nb){
-		this.nbChar += nb;
+
+	public String getNomDeFichier() {
+		return this.nomDeFichier;
+	}
+
+	public void setNomDeFichier(String nomDeFichier) {
+		this.nomDeFichier = nomDeFichier;
 	}
 
 	public int getDebutDeLigne() {
-		return debutDeLigne;
-	}
-	public String getFichier() {
-		return this.nomDuFichier;
-	}
-	public String getPredicat() {
-		return this.predicat;
-	}
-	public List<String> getVariables() {
-		return this.variables;
-	}
-	public int getNbLine() {
-		return this.nbLigne;
-	}
-	public int getDegre() {
-		return this.degre;
-	}
-	public int getNbChar() {
-		return this.nbChar;
+		return this.debutDeLigne;
 	}
 
-	public void setFichier(String fichier) {
-		this.nomDuFichier = fichier;
-	}
-	public void setPredicat(String predicat) {
-		this.predicat = predicat;
-	}
-	public void setVariables(List<String> variables) {
-		this.variables = variables;
-	}
 	public void setDebutDeLigne(int debutDeLigne) {
 		this.debutDeLigne = debutDeLigne;
 	}
-	public void setNbLine(int nbLine) {
-		this.nbLigne = nbLine;
+
+	public int getNombreDeLigne() {
+		return this.nombreDeLigne;
 	}
+
+	public void setNombreDeLigne(int nombreDeLigne) {
+		this.nombreDeLigne = nombreDeLigne;
+	}
+
+	public int getNombreDeCaractere() {
+		return this.nombreDeCaractere;
+	}
+
+	public void setNombreDeCaractere(int nombreDeCaractere) {
+		this.nombreDeCaractere = nombreDeCaractere;
+	}
+
+	public int getDegre() {
+		return this.degre;
+	}
+
 	public void setDegre(int degre) {
 		this.degre = degre;
 	}
-	public void setNbChar(int nbChar) {
-		this.nbChar = nbChar;
+
+	public CodeVariant getCodeVariant() {
+		return this.codeVariant;
 	}
 
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((predicat == null) ? 0 : predicat.hashCode());
-		return result;
+	public void setCodeVariant(CodeVariant codeVariant) {
+		this.codeVariant = codeVariant;
 	}
-	
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Annotation other = (Annotation) obj;
-		if (predicat == null) {
-			if (other.predicat != null)
-				return false;
-		} else if (!predicat.equals(other.predicat))
-			return false;
-		return true;
+	public Proposition getProposition() {
+		return this.proposition;
+	}
+
+	public void setProposition(Proposition proposition) {
+		this.proposition = proposition;
+	}
+
+	public abstract void afficherArborescence();
+
+	public void ajouterEnfant(Annotation annotation) {
+		throw new UnsupportedOperationException();
+	}
+
+	public List<Annotation> getAnnotationsEnfant() {
+		throw new UnsupportedOperationException();
+	}
+
+	public void setAnnotationsEnfant(List<Annotation> annotation) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void ajouterLigneDeCodeVariant(String ligne) {
+		this.codeVariant.ajouter(ligne);
 	}
 
 }
