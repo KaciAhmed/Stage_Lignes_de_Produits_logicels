@@ -25,7 +25,7 @@ public class AnnotationComposer extends Annotation implements Serializable {
 
 	public AnnotationComposer() {
 		super();
-		// TODO Auto-generated constructor stub
+		this.annotationsEnfant = new ArrayList<>();
 	}
 
 	public AnnotationComposer(String nomDeFichier, int debutDeLigne, int nombreDeLigne, int nombreDeCaractere,

@@ -1,5 +1,6 @@
 package package1;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -13,33 +14,21 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(propOrder = { "input", "annotations" })
 public class AnnotationsWrapper {
 	private String input = "";
-	
+
 	@XmlElement(name = "annotations")
 	private List<Annotation> annotations = null;
 
 	public AnnotationsWrapper() {
 		super();
-		// TODO Auto-generated constructor stub
+		this.annotations = new ArrayList<Annotation>();
 	}
 
 	public AnnotationsWrapper(List<Annotation> annotations) {
 		super();
 		this.annotations = annotations;
 	}
-	
-	public String getNomFichierInput() {
-		return input;
-	}
 
-	public void setNomFichierInput(String nomFichierOutput) {
-		this.input = nomFichierOutput;
-	}
-
-	public List<Annotation> getAnnotations() {
-		return this.annotations;
-	}
-
-	public void setAnnotations(List<Annotation> annotations) {
-		this.annotations = annotations;
+	public void setNomFichierInput(String input) {
+		this.input = input;
 	}
 }

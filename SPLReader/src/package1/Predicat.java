@@ -13,7 +13,6 @@ public class Predicat implements Serializable {
 
 	public Predicat() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Predicat(String nom) {

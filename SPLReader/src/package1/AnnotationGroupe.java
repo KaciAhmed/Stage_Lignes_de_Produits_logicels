@@ -22,4 +22,56 @@ public class AnnotationGroupe {
 			this.annotations.add(annotation);
 		}
 	}
+
+	public List<Annotation> getAnnotations() {
+		return this.annotations;
+	}
+
+	public void setAnnotations(List<Annotation> annotations) {
+		this.annotations = annotations;
+	}
+
+	public Proposition getProposition() {
+		return this.proposition;
+	}
+
+	public void setProposition(Proposition proposition) {
+		this.proposition = proposition;
+	}
+
+	@Override
+	public String toString() {
+		return "AnnotationGroupe [proposition=" + this.proposition + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + ((this.proposition == null) ? 0 : this.proposition.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		AnnotationGroupe other = (AnnotationGroupe) obj;
+		if (this.proposition == null) {
+			if (other.proposition != null) {
+				return false;
+			}
+		} else if (!this.proposition.equals(other.proposition)) {
+			return false;
+		}
+		return true;
+	}
+
 }

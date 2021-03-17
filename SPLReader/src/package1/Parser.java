@@ -7,7 +7,9 @@ import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 import javax.xml.bind.JAXBContext;
@@ -21,31 +23,48 @@ public class Parser {
 
 	public static void main(String[] args) {
 		String inputDirectory = STRING_VIDE;
-		String outputFile = "";
+		String fichierSortiePrincipal = STRING_VIDE;
+		String fichierSortieSynthese = STRING_VIDE;
 		final long timestamp = Instant.now().getEpochSecond();
-		final String dossierParDefaut = "out" + File.separator;
-		final String nomParDefaut = "output_";
+		final String nomDossierPrincipalParDefaut = "out";
+		File dossierPrincipal = new File(nomDossierPrincipalParDefaut);
+		dossierPrincipal.mkdir();
+
+		final String nomDossier = "fichiersSortie" + timestamp;
+		File dossier = new File(nomDossierPrincipalParDefaut + File.separator + nomDossier);
+		dossier.mkdir();
+
+		final String nomFichierSortieParDefaut = "output_";
+		final String nomFichierSyntheseParDefaut = "output_synthese";
 		List<Annotation> annotations;
+		List<AnnotationSynthese> annotationsSyntheses;
 
 		if (args.length > 0) {
 			inputDirectory = args[0];
 			if (args.length > 1) {
-				outputFile = args[1];
-			}else {
-				outputFile = dossierParDefaut + nomParDefaut;
+				fichierSortiePrincipal = args[1];
+			} else {
+				fichierSortiePrincipal = nomDossierPrincipalParDefaut + File.separator + nomDossier + File.separator
+						+ nomFichierSortieParDefaut;
+				fichierSortieSynthese = nomDossierPrincipalParDefaut + File.separator + nomDossier + File.separator
+						+ nomFichierSyntheseParDefaut;
 			}
 		} else {
 			System.out.println("Usage <path/to/code/> <optional/path/to/result.xml>");
 		}
-		
-		
-		outputFile += timestamp + ".xml";
-		
+
+		fichierSortiePrincipal += ".xml";
+		fichierSortieSynthese += ".xml";
 		Parser parseur = new Parser();
 		annotations = parseur.parser(inputDirectory);
 		AnnotationsWrapper annotationsWrapper = new AnnotationsWrapper(annotations);
 		annotationsWrapper.setNomFichierInput(inputDirectory);
-		jaxbObjectToXML(annotationsWrapper, outputFile);
+		jaxbObjectToXML(annotationsWrapper, fichierSortiePrincipal);
+		List<Annotation> annotationsIntermediaire = parseur.lineariserAnnotations(annotations);
+		annotationsSyntheses = parseur.creerAnnotationsSyntheses(annotationsIntermediaire);
+		AnnotationsSynthesesWrapper annotationsSynthesesWrapper = new AnnotationsSynthesesWrapper(annotationsSyntheses);
+		jaxbObjectToXML(annotationsSynthesesWrapper, fichierSortieSynthese);
+
 	}
 
 	public List<Annotation> parser(String inputDirectory) {
@@ -54,6 +73,9 @@ public class Parser {
 		return annotationFinale;
 	}
 
+	/****************************
+	 * Lecture dossier
+	 ***************************************/
 	private List<Annotation> lireDossier(File dossier) {
 		String nomDeFichier;
 		List<Annotation> annotations = new ArrayList<>();
@@ -98,6 +120,9 @@ public class Parser {
 		return fichierExtension.equals(extensionFichierVoulu);
 	}
 
+	/************************************
+	 * Lecture fichier
+	 *********************************/
 	private List<String> lireFichier(String nomDeFichier) {
 		List<String> contenuFichier = new ArrayList<String>();
 		try {
@@ -116,11 +141,9 @@ public class Parser {
 		return contenuFichier;
 	}
 
-	private void concatenerListes(List<Annotation> lst1, List<Annotation> lst2) {
-		for (Annotation annotation : lst2) {
-			lst1.add(annotation);
-		}
-	}
+	/*********************
+	 * creer arboraissance annotation
+	 *************************************/
 
 	private void creerArborescenceDesAnnotations(String nomDeFichier, List<String> lignesFichier,
 			List<Annotation> annotations, Stack<Annotation> pileAnnotation, Annotation annotationCourante, int degre,
@@ -165,6 +188,12 @@ public class Parser {
 		}
 	}
 
+	private void concatenerListes(List<Annotation> lst1, List<Annotation> lst2) {
+		for (Annotation annotation : lst2) {
+			lst1.add(annotation);
+		}
+	}
+
 	private boolean estCurseurFin(List<String> lstContenu, int indice) {
 		return indice == lstContenu.size();
 	}
@@ -205,7 +234,7 @@ public class Parser {
 				nbCharLigneCourante, degre, codeVariant, proposition);
 		return annotationCourante;
 	}
-	
+
 	private static Proposition creerProposition(String ligne) {
 		Proposition proposition = new Proposition();
 		proposition.parserFormule(ligne);
@@ -215,52 +244,155 @@ public class Parser {
 	private List<Annotation> simplifierAnnotations(List<Annotation> lstAnnotations) {
 		List<Annotation> lst = new ArrayList<Annotation>();
 		Annotation annotationComposer = null;
-		Annotation temp;
-		
 		for (int i = 0; i < lstAnnotations.size(); i++) {
 			annotationComposer = lstAnnotations.get(i);
-			Annotation annotationSimplifier = simplifierAnnotation(annotationComposer);
+			Annotation annotationSimplifier = simplifierUneAnnotation(annotationComposer);
 			lst.add(annotationSimplifier);
 		}
 		return lst;
 	}
 
-	private Annotation simplifierAnnotation(Annotation annotationComposer) {
-		Annotation simplification = null;
+	private Annotation simplifierUneAnnotation(Annotation annotationComposer) {
+		Annotation annotationRetourner = null;
 		List<Annotation> annotationsEnfantCourant = annotationComposer.getAnnotationsEnfant();
 		if (annotationsEnfantCourant.isEmpty()) {
-			simplification = creerAnnotationSimple(annotationComposer);
+			annotationRetourner = creerAnnotationSimple(annotationComposer);
 		} else {
 			List<Annotation> annotationsEnfantSimplifier = simplifierAnnotations(annotationsEnfantCourant);
 			annotationComposer.setAnnotationsEnfant(annotationsEnfantSimplifier);
+			annotationRetourner = annotationComposer;
 		}
-		return simplification;
+		return annotationRetourner;
 	}
 
 	private AnnotationSimple creerAnnotationSimple(Annotation annotationComposer) {
-		return new AnnotationSimple(annotationComposer.getNomDeFichier(),
-				annotationComposer.getDebutDeLigne(), annotationComposer.getNombreDeLigne(),
-				annotationComposer.getNombreDeCaractere(), annotationComposer.getDegre(),
-				annotationComposer.getCodeVariant(), annotationComposer.getProposition());
+		return new AnnotationSimple(annotationComposer.getNomDeFichier(), annotationComposer.getDebutDeLigne(),
+				annotationComposer.getNombreDeLigne(), annotationComposer.getNombreDeCaractere(),
+				annotationComposer.getDegre(), annotationComposer.getCodeVariant(),
+				annotationComposer.getProposition());
 	}
-	
+
 	private static void jaxbObjectToXML(AnnotationsWrapper annotationsWrapper, String outputFileName) {
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(AnnotationsWrapper.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-			
+
 			jaxbMarshaller.marshal(annotationsWrapper, new File(outputFileName));
 
 		} catch (JAXBException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void afficherAnnotations(List<Annotation> lstAnnotations) {
 		for (Annotation annotation : lstAnnotations) {
 			annotation.afficherArborescence();
+		}
+	}
+
+	/********************************************
+	 * Annotation synthese *************
+	 **************/
+	public void afficherSynthese(List<AnnotationSynthese> annotationSyntheses) {
+		for (AnnotationSynthese annotationSynthese : annotationSyntheses) {
+			System.out.println(annotationSynthese);
+		}
+	}
+
+	private List<Annotation> lineariserAnnotations(List<Annotation> annotations) {
+		List<Annotation> annotationsLineaire = new ArrayList<>();
+		for (Annotation annotation : annotations) {
+			if (annotation instanceof AnnotationSimple) {
+				annotationsLineaire.add(annotation);
+			} else {
+				annotationsLineaire.add(annotation);
+				annotationsLineaire.addAll(lineariserAnnotations(annotation.getAnnotationsEnfant()));
+			}
+		}
+		return annotationsLineaire;
+	}
+
+	private List<AnnotationSynthese> creerAnnotationsSyntheses(List<Annotation> annotations) {
+
+		List<AnnotationSynthese> annotationsSyntheses = new ArrayList<AnnotationSynthese>();
+		Set<AnnotationGroupe> annotationsGroupes = creerAnnotationsGroupes(annotations);
+
+		for (AnnotationGroupe annotationGroupe : annotationsGroupes) {
+
+			AnnotationSynthese resultat = creerAnnotationSynthese(annotationGroupe);
+			annotationsSyntheses.add(resultat);
+		}
+
+		return annotationsSyntheses;
+	}
+
+	private AnnotationSynthese creerAnnotationSynthese(AnnotationGroupe annotationGroupe) {
+		AnnotationSynthese annotationResultat = new AnnotationSynthese();
+		annotationResultat.setProposition(annotationGroupe.getProposition());
+
+		int sumLignes;
+		int sumDegrees;
+		int sumNbcaracteres;
+		int nbAnnotationSimple = 0;
+		int nbAnnotationComp = 0;
+
+		for (Annotation annotation : annotationGroupe.getAnnotations()) {
+			annotationResultat.getLstNombreDeLigne().add(annotation.getNombreDeLigne());
+			annotationResultat.getLstNombreDeCaractere().add(annotation.getNombreDeCaractere());
+			annotationResultat.getLstDegree().add(annotation.getDegre());
+			if (annotation instanceof AnnotationSimple) {
+				nbAnnotationSimple++;
+			} else {
+
+				nbAnnotationComp++;
+			}
+
+		}
+		annotationResultat.setNbAnnotationSimple(nbAnnotationSimple);
+		annotationResultat.setNbAnnotationComp(nbAnnotationComp);
+
+		sumLignes = annotationResultat.getLstNombreDeLigne().stream().mapToInt(e -> e).sum();
+		annotationResultat.setMoyNombreLigne(sumLignes / annotationResultat.getLstNombreDeLigne().size());
+
+		sumDegrees = annotationResultat.getLstDegree().stream().mapToInt(e -> e).sum();
+		annotationResultat.setMoyDegree(sumDegrees / annotationResultat.getLstDegree().size());
+
+		sumNbcaracteres = annotationResultat.getLstNombreDeCaractere().stream().mapToInt(e -> e).sum();
+		annotationResultat.setMoyNombreCaractere(sumNbcaracteres / annotationResultat.getLstNombreDeLigne().size());
+
+		return annotationResultat;
+	}
+
+	private Set<AnnotationGroupe> creerAnnotationsGroupes(List<Annotation> annotations) {
+		Set<AnnotationGroupe> annotationsGroupes = new HashSet<>();
+		AnnotationGroupe annotationGroupe;
+
+		for (Annotation annotation : annotations) {
+			annotationGroupe = new AnnotationGroupe(annotation.getProposition());
+			annotationsGroupes.add(annotationGroupe);
+		}
+		for (Annotation annotation : annotations) {
+			for (AnnotationGroupe annotationGroupe2 : annotationsGroupes) {
+				annotationGroupe2.ajouterAnnotation(annotation);
+			}
+		}
+		return annotationsGroupes;
+	}
+
+	private static void jaxbObjectToXML(AnnotationsSynthesesWrapper annotationsSynthesesWrapper,
+			String outputFileName) {
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(AnnotationsSynthesesWrapper.class);
+			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+
+			jaxbMarshaller.marshal(annotationsSynthesesWrapper, new File(outputFileName));
+
+		} catch (JAXBException e) {
+			e.printStackTrace();
 		}
 	}
 }

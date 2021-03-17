@@ -1,6 +1,7 @@
 package package1;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -19,7 +20,7 @@ public class CodeVariant implements Serializable {
 
 	public CodeVariant() {
 		super();
-		// TODO Auto-generated constructor stub
+		this.ligneDeCode = new ArrayList<String>();
 	}
 
 	public CodeVariant(List<String> ligneDeCode) {
