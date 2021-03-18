@@ -20,6 +20,7 @@ public class Parser {
 	public static final String REGEX_TAB = "\\t";
 	public static final String STRING_VIDE = "";
 	public static final String ESPACE = " ";
+	public static int nbFichierParser = 0;
 
 	public static void main(String[] args) {
 		String inputDirectory = STRING_VIDE;
@@ -46,9 +47,9 @@ public class Parser {
 			} else {
 				fichierSortiePrincipal = nomDossierPrincipalParDefaut + File.separator + nomDossier + File.separator
 						+ nomFichierSortieParDefaut;
-				fichierSortieSynthese = nomDossierPrincipalParDefaut + File.separator + nomDossier + File.separator
-						+ nomFichierSyntheseParDefaut;
 			}
+			fichierSortieSynthese = nomDossierPrincipalParDefaut + File.separator + nomDossier + File.separator
+					+ nomFichierSyntheseParDefaut;
 		} else {
 			System.out.println("Usage <path/to/code/> <optional/path/to/result.xml>");
 		}
@@ -60,11 +61,14 @@ public class Parser {
 		AnnotationsWrapper annotationsWrapper = new AnnotationsWrapper(annotations);
 		annotationsWrapper.setNomFichierInput(inputDirectory);
 		jaxbObjectToXML(annotationsWrapper, fichierSortiePrincipal);
-		List<Annotation> annotationsIntermediaire = parseur.lineariserAnnotations(annotations);
-		annotationsSyntheses = parseur.creerAnnotationsSyntheses(annotationsIntermediaire);
-		AnnotationsSynthesesWrapper annotationsSynthesesWrapper = new AnnotationsSynthesesWrapper(annotationsSyntheses);
+		List<Annotation> annotationsLineariser = parseur.lineariserAnnotations(annotations);
+		Set<AnnotationGroupe> annotationsGroupes = parseur.creerAnnotationsGroupes(annotations);
+		annotationsSyntheses = parseur.creerAnnotationsSyntheses(annotationsGroupes);
+		MetricsVital metricsVital = new MetricsVital();
+		metricsVital.calculerMetrics(annotationsSyntheses, annotationsGroupes, annotationsLineariser, nbFichierParser);
+		AnnotationsSynthesesWrapper annotationsSynthesesWrapper = new AnnotationsSynthesesWrapper(annotationsSyntheses,
+				metricsVital);
 		jaxbObjectToXML(annotationsSynthesesWrapper, fichierSortieSynthese);
-
 	}
 
 	public List<Annotation> parser(String inputDirectory) {
@@ -92,6 +96,7 @@ public class Parser {
 				if (estFichierVoulu(fichier)) {
 					System.out
 							.println("-------------------------" + fichier.getName() + "-----------------------------");
+					nbFichierParser++;
 					nomDeFichier = fichier.getAbsolutePath();
 					annotations = new ArrayList<Annotation>();
 					pileAnnotation = new Stack<Annotation>();
@@ -141,7 +146,7 @@ public class Parser {
 		return contenuFichier;
 	}
 
-	/*********************
+	/**********************
 	 * creer arboraissance annotation
 	 *************************************/
 
@@ -314,10 +319,9 @@ public class Parser {
 		return annotationsLineaire;
 	}
 
-	private List<AnnotationSynthese> creerAnnotationsSyntheses(List<Annotation> annotations) {
+	private List<AnnotationSynthese> creerAnnotationsSyntheses(Set<AnnotationGroupe> annotationsGroupes) {
 
 		List<AnnotationSynthese> annotationsSyntheses = new ArrayList<AnnotationSynthese>();
-		Set<AnnotationGroupe> annotationsGroupes = creerAnnotationsGroupes(annotations);
 
 		for (AnnotationGroupe annotationGroupe : annotationsGroupes) {
 

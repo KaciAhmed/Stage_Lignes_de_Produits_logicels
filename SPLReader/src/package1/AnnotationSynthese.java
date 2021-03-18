@@ -33,9 +33,7 @@ public class AnnotationSynthese {
 		super();
 		this.listeNombreDeLigne = new ArrayList<Integer>();
 		this.listeNombreDeCaractere = new ArrayList<>();
-		;
 		this.listeDegree = new ArrayList<>();
-		;
 	}
 
 	public AnnotationSynthese(Proposition proposition, List<Integer> lstNombreDeLigne,
@@ -134,5 +132,4 @@ public class AnnotationSynthese {
 				+ ", \n nbAnnotationSimple=" + this.nbAnnotationSimple + ", nbAnnotationComp=" + this.nbAnnotationComp
 				+ "]";
 	}
-
 }
