@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
@@ -17,6 +18,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 public class Parser {
+	private static final String DEBUT_ANNOTATION_NON_ESPACER = "//";
+	private static final String DEBUT_ANNOTATION_ESPACER = "//\s";
 	public static final String REGEX_TAB = "\\t";
 	public static final String STRING_VIDE = "";
 	public static final String ESPACE = " ";
@@ -159,7 +162,7 @@ public class Parser {
 			String ligneCourante = lignesFichier.get(indiceCurseurDeLigne);
 			ligneCourante = ligneCourante.replaceAll(REGEX_TAB, STRING_VIDE);
 			int nbCharLigneCourante = ligneCourante.length();
-			String[] motsCles = ligneCourante.trim().split(ESPACE);
+			String[] motsCles = ligneCourante.trim().replaceAll(DEBUT_ANNOTATION_ESPACER, DEBUT_ANNOTATION_NON_ESPACER).split(ESPACE);
 			if (estDebutAnnotation(motsCles)) {
 				miseAjourPileAnnotation(pileAnnotation, nbCharLigneCourante);
 				degre++;
@@ -205,7 +208,15 @@ public class Parser {
 
 	private boolean estDebutAnnotation(String[] motsCles) {
 		final String debutAnnotation = "//#if";
-		return motsCles[0].contains(debutAnnotation);
+		boolean resultat = false;
+		String concat = "";
+		for (String string : motsCles) {
+			concat += motsCles[0];
+			if(concat.contains(debutAnnotation)) {
+				resultat = true;
+			}
+		}
+		return resultat;
 	}
 
 	private boolean estFinAnnotation(String[] motsCles) {
