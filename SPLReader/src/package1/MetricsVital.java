@@ -18,23 +18,25 @@ public class MetricsVital {
 
 	private float moyenneDegree; // sum(moyenne degree) / nbAnnotationsGroupe
 	private float dispersionPredicatsDansLesAnnotations; // nbPredicatTotal / nbAnnotationTotal
-
-	private float avgVarFanOutOnVPG; // nbPredicatTotalDeTousLesVPGs / nbVpgTotal // var
-										// fan-out-onVPG
-	private float avgVarFanOutOnFile; // (nbPredicatsParFichier / NbFichier) d'un fichier // var
-										// fan-in-on file
-	private float avgVarFanInOnFile; // nbPredicatsTotalDeTousLesFichier / nbFichiers //
-										// Var fan-out-on file
+	private float avgVarFanOutOnVPG; // nbPredicatTotalDeTousLesVPGs / nbVpgTotal // var // fan-out-onVPG
+	private float avgVarFanOutOnFile; // (nbPredicatsParFichier / NbFichier) d'un fichier // var // fan-in-on file
+	private float avgVarFanInOnFile; // nbPredicatsTotalDeTousLesFichier / nbFichiers // // Var fan-out-on file
 	private float avgVpFanInOnFile; // nbAnnotationsDifferent / nbAnnotationsTotal d'un
 	@XmlTransient // fichier // VP Fan in on file
 	private Set<Predicat> ensemblePredicats;
 	@XmlTransient
 	private Map<Predicat, List<AnnotationGroupe>> appartenancePredicatVPG;
+	@XmlTransient
+	private Map<Predicat, List<String>> appartenancePredicatFichier;
+	@XmlTransient
+	private Map<Annotation, List<String>> appartenanceAnnotationFichier;
 
 	public MetricsVital() {
 		super();
 		this.ensemblePredicats = new HashSet<>();
 		this.appartenancePredicatVPG = new HashMap<Predicat, List<AnnotationGroupe>>();
+		this.appartenancePredicatFichier = new HashMap<Predicat, List<String>>();
+		this.appartenanceAnnotationFichier = new HashMap<>();
 	}
 
 	public MetricsVital(float moyenneDegree, float dispersionPredicatsDansLesAnnotations,
@@ -50,22 +52,20 @@ public class MetricsVital {
 		this.avgVpFanInOnFile = rapportAnnotationDifferenteParAnnotationTotal;
 		this.ensemblePredicats = new HashSet<>();
 		this.appartenancePredicatVPG = new HashMap<Predicat, List<AnnotationGroupe>>();
+		this.appartenancePredicatFichier = new HashMap<Predicat, List<String>>();
+		this.appartenanceAnnotationFichier = new HashMap<>();
+
 	}
 
 	public void calculerMetrics(List<AnnotationSynthese> annotationsSyntheses, Set<AnnotationGroupe> annotationsGroupes,
 			List<Annotation> annotationsLineariser, int nbFichierParser) {
-		// TODO
 		calculerMoyenneDegree(annotationsSyntheses);
 		calculerDispersionPredicatDansLesAnnotations(annotationsLineariser);
 		recupererTousPredicatsProjet(annotationsGroupes);
 		calculerAvgVarFanOutOnVPG(annotationsGroupes);
-		// calculerRapporPredicatsParGroupesAnnotations(annotationsGroupes);
-		// calculerRapporPredicatsfichierParNbTotalFichier(annotationsLineariser,
-		// nbFichierParser);
-		// moyenneNbPredicatTousLesFichierParNbTotalFichier; //
-		// nbPredicatsTotalDeTousLesFichier / nbFichiers // Var fan-out-on file
-		// RapportAnnotationDifferenteParAnnotationTotal; // nbAnnotationsDifferent /
-		// nbAnnotationsTotal d'un fichier // VP Fan in on file
+		calculerAvgVarFanOutOnFile(annotationsGroupes, annotationsLineariser);
+		calculerAvgVarFanInOnFile(annotationsGroupes, annotationsLineariser);
+		calculerAvgVpFanInOnFile(annotationsLineariser);
 	}
 
 	public void calculerMoyenneDegree(List<AnnotationSynthese> annotationsSyntheses) {
@@ -91,15 +91,7 @@ public class MetricsVital {
 		setDispersionPredicatsDansLesAnnotations(resultat);
 	}
 
-	/*
-	 * récupurer tous les prédicats du projet //set cacluer le nombre total de
-	 * groupes annotations pour chaque prédicats chercher la liste des Groupes
-	 * d'annotations qui le contient // caluler la cardinalité des de la liste des
-	 * Groupes d'annotations diviser la cardinalité par le nombre de groupe
-	 * d'annotation et stocké le résultat dans une liste sommet les élément de la
-	 * liste et le diviser par le nombre d'élément de la liste
-	 */
-	public float calculerMoyenneParPredicat(Predicat predicat, int nbTotalGroupeAnnotation) {
+	public float calculerMoyenneVPGParPredicat(Predicat predicat, int nbTotalGroupeAnnotation) {
 		List<AnnotationGroupe> lstAnnotationGroupeOfPredicat = this.appartenancePredicatVPG.get(predicat);
 		int nbOccurance = 0;
 		for (AnnotationGroupe annotationGroupe : lstAnnotationGroupeOfPredicat) {
@@ -143,10 +135,129 @@ public class MetricsVital {
 		remplirAppratenancePredicatVPG(annotationsGroupes);
 		List<Float> listMoyenneParPredicat = new ArrayList<>();
 		for (Predicat predicat : this.ensemblePredicats) {
-			listMoyenneParPredicat.add(Float.valueOf(calculerMoyenneParPredicat(predicat, nbTotalGroupeAnnotation)));
+			listMoyenneParPredicat.add(Float.valueOf(calculerMoyenneVPGParPredicat(predicat, nbTotalGroupeAnnotation)));
 		}
 		Double resultat = listMoyenneParPredicat.stream().mapToDouble(e -> e).sum() / listMoyenneParPredicat.size();
 		this.setAvgVarFanOutOnVPG(resultat.floatValue());
+
+	}
+
+	public float calculerMoyenneFichiersParPredicat(Predicat predicat, int nbTotalFichier) {
+		List<String> listeFichierDuPredicat = this.appartenancePredicatFichier.get(predicat);
+		return listeFichierDuPredicat.size() / nbTotalFichier;
+	}
+
+	public boolean verifierAppartenancePredicat(Predicat predicat, Annotation annotation) {
+		return annotation.getProposition().getPredicats().contains(predicat);
+	}
+
+	public void remplirAppratenancePredicatFichier(List<Annotation> annotations) {
+		List<String> listeFichierDuPredicat;
+		for (Predicat predicat : this.ensemblePredicats) {
+			listeFichierDuPredicat = new ArrayList<>();
+			for (Annotation annotation : annotations) {
+				if (verifierAppartenancePredicat(predicat, annotation)) {
+					listeFichierDuPredicat.add(annotation.getNomDeFichier());
+				}
+			}
+			this.appartenancePredicatFichier.put(predicat, listeFichierDuPredicat);
+		}
+	}
+
+	public Set<String> recupererTousLesFichiers(List<Annotation> annotations) {
+		Set<String> ensembleFichiers = new HashSet<>();
+		for (Annotation annotation : annotations) {
+			ensembleFichiers.add(annotation.getNomDeFichier());
+		}
+		return ensembleFichiers;
+	}
+
+	public void calculerAvgVarFanOutOnFile(Set<AnnotationGroupe> annotationsGroupes, List<Annotation> annotations) {
+		recupererTousPredicatsProjet(annotationsGroupes);
+		Set<String> listeFichiers = recupererTousLesFichiers(annotations);
+		int nbTotalFichier = listeFichiers.size();
+		remplirAppratenancePredicatFichier(annotations);
+		List<Float> listMoyenneParPredicat = new ArrayList<>();
+		for (Predicat predicat : this.ensemblePredicats) {
+			listMoyenneParPredicat.add(Float.valueOf(calculerMoyenneFichiersParPredicat(predicat, nbTotalFichier)));
+		}
+		Double resultat = listMoyenneParPredicat.stream().mapToDouble(e -> e).sum() / listMoyenneParPredicat.size();
+		this.setAvgVarFanOutOnFile(resultat.floatValue());
+
+	}
+
+	public float calculerMoyenneFichiersParPredicatFanIn(Predicat predicat, int nbTotalFichier,
+			List<Annotation> annotations) {
+		List<String> listeFichierDuPredicat = this.appartenancePredicatFichier.get(predicat);
+		int nbOccurance = 0;
+		for (Annotation annotation : annotations) {
+			for (String nomFichier : listeFichierDuPredicat) {
+				if (annotation.getNomDeFichier().equals(nomFichier)) {
+					for (Predicat predicat2 : annotation.getProposition().getPredicats()) {
+						if (predicat.equals(predicat2)) {
+							nbOccurance++;
+						}
+					}
+				}
+			}
+		}
+		return nbOccurance / nbTotalFichier;
+	}
+
+	public void calculerAvgVarFanInOnFile(Set<AnnotationGroupe> annotationsGroupes, List<Annotation> annotations) {
+		recupererTousPredicatsProjet(annotationsGroupes);
+		Set<String> listeFichiers = recupererTousLesFichiers(annotations);
+		int nbTotalFichier = listeFichiers.size();
+		remplirAppratenancePredicatFichier(annotations);
+		List<Float> listMoyenneParPredicat = new ArrayList<>();
+		for (Predicat predicat : this.ensemblePredicats) {
+			listMoyenneParPredicat.add(Float.valueOf(calculerMoyenneFichiersParPredicat(predicat, nbTotalFichier)));
+		}
+		Double resultat = listMoyenneParPredicat.stream().mapToDouble(e -> e).sum() / listMoyenneParPredicat.size();
+		this.setAvgVarFanInOnFile(resultat.floatValue());
+
+	}
+
+	public float calculerMoyenneFichierParAnnotation(Annotation annotation, int nbTotalFichiers,
+			List<Annotation> annotations) {
+		List<String> listeFichierOfAnnotation = this.appartenanceAnnotationFichier.get(annotation);
+		int nbOccurance = 0;
+		for (Annotation annotation2 : annotations) {
+			for (String nomFichier : listeFichierOfAnnotation) {
+				if (annotation2.getNomDeFichier().equals(nomFichier)
+						&& annotation2.getProposition().equals(annotation.getProposition())) {
+					nbOccurance++;
+				}
+			}
+		}
+		return nbOccurance / nbTotalFichiers;
+	}
+
+	public void remplirAppratenanceAnnotationFichier(List<Annotation> annotations, Set<String> listeTotalFichiers) {
+		List<String> listeFichierOfAnnotation;
+		for (Annotation annotation : annotations) {
+			listeFichierOfAnnotation = new ArrayList<>();
+			for (String nomFichier : listeTotalFichiers) {
+				if (annotation.getNomDeFichier().equals(nomFichier)) {
+					listeFichierOfAnnotation.add(annotation.getNomDeFichier());
+				}
+			}
+			this.appartenanceAnnotationFichier.put(annotation, listeFichierOfAnnotation);
+		}
+	}
+
+	public void calculerAvgVpFanInOnFile(List<Annotation> annotations) {
+		Set<String> listeFichiers = recupererTousLesFichiers(annotations);
+		int nbTotalFichier = listeFichiers.size();
+		remplirAppratenanceAnnotationFichier(annotations, listeFichiers);
+		List<Float> listMoyenneFichierParAnnotation = new ArrayList<>();
+		for (Annotation annotation : annotations) {
+			listMoyenneFichierParAnnotation
+					.add(Float.valueOf(calculerMoyenneFichierParAnnotation(annotation, nbTotalFichier, annotations)));
+		}
+		Double resultat = listMoyenneFichierParAnnotation.stream().mapToDouble(e -> e).sum()
+				/ listMoyenneFichierParAnnotation.size();
+		this.setAvgVpFanInOnFile(resultat.floatValue());
 
 	}
 
