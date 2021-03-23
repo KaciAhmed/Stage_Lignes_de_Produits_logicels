@@ -1,10 +1,14 @@
 package package1;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,33 +29,39 @@ public class Parser {
 	public static int nbFichierParser = 0;
 
 	public static void main(String[] args) {
-		String inputDirectory = STRING_VIDE;
-		String fichierSortiePrincipal = STRING_VIDE;
-		String fichierSortieSynthese = STRING_VIDE;
-		final long timestamp = Instant.now().getEpochSecond();
-		final String nomDossierPrincipalParDefaut = "out";
-		File dossierPrincipal = new File(nomDossierPrincipalParDefaut);
-		dossierPrincipal.mkdir();
-
-		final String nomDossier = "fichiersSortie" + timestamp;
-		File dossier = new File(nomDossierPrincipalParDefaut + File.separator + nomDossier);
-		dossier.mkdir();
-
-		final String nomFichierSortieParDefaut = "output_";
-		final String nomFichierSyntheseParDefaut = "output_synthese";
 		List<Annotation> annotations;
 		List<AnnotationSynthese> annotationsSyntheses;
+
+		String inputDirectory = STRING_VIDE;
+		final String nomDossierSortiePrincipalParDefaut = "out";
+		File dossierSortiePrincipal = new File(nomDossierSortiePrincipalParDefaut);
+		dossierSortiePrincipal.mkdir();
+
+		final long timestamp = Instant.now().getEpochSecond();
+		final String nomDossierSortie = "Sortie" + timestamp;
+		File dossier = new File(nomDossierSortiePrincipalParDefaut + File.separator + nomDossierSortie);
+		dossier.mkdir();
+
+		String fichierSortiePrincipal = STRING_VIDE;
+		String fichierSortieSynthese = STRING_VIDE;
+		String fichierSortieImplication = STRING_VIDE;
+
+		final String nomFichierSortie = "output_";
+		final String nomFichierSynthese = "output_synthese";
+		final String nomFichierImplication = "output_implication";
 
 		if (args.length > 0) {
 			inputDirectory = args[0];
 			if (args.length > 1) {
 				fichierSortiePrincipal = args[1];
 			} else {
-				fichierSortiePrincipal = nomDossierPrincipalParDefaut + File.separator + nomDossier + File.separator
-						+ nomFichierSortieParDefaut;
+				fichierSortiePrincipal = nomDossierSortiePrincipalParDefaut + File.separator + nomDossierSortie
+						+ File.separator + nomFichierSortie;
 			}
-			fichierSortieSynthese = nomDossierPrincipalParDefaut + File.separator + nomDossier + File.separator
-					+ nomFichierSyntheseParDefaut;
+			fichierSortieSynthese = nomDossierSortiePrincipalParDefaut + File.separator + nomDossierSortie
+					+ File.separator + nomFichierSynthese;
+			fichierSortieImplication = nomDossierSortiePrincipalParDefaut + File.separator + nomDossierSortie
+					+ File.separator + nomFichierImplication;
 		} else {
 			System.out.println("Usage <path/to/code/> <optional/path/to/result.xml>");
 		}
@@ -71,6 +81,12 @@ public class Parser {
 		AnnotationsSynthesesWrapper annotationsSynthesesWrapper = new AnnotationsSynthesesWrapper(annotationsSyntheses,
 				metricsVital);
 		jaxbObjectToXML(annotationsSynthesesWrapper, fichierSortieSynthese);
+
+		Set<String> implications = parseur.genererImplications(annotations, new ArrayList<Predicat>());
+		for (String str : implications) {
+			System.out.println(str);
+		}
+		parseur.creerFichierImplication(implications, fichierSortieImplication);
 	}
 
 	public List<Annotation> parser(String inputDirectory) {
@@ -407,6 +423,64 @@ public class Parser {
 			jaxbMarshaller.marshal(annotationsSynthesesWrapper, new File(outputFileName));
 
 		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/***********************************
+	 * implication des annotations
+	 */
+	public boolean estAnnotationComposer(Annotation annotation) {
+		try {
+			return !annotation.getAnnotationsEnfant().isEmpty();
+		} catch (UnsupportedOperationException e) {
+			return false;
+		}
+
+	}
+
+	private void concatenerSetsString(Set<String> set1, Set<String> set2) {
+		for (String str : set2) {
+			set1.add(str);
+		}
+	}
+
+	public Set<String> genererImplications(List<Annotation> annotations, List<Predicat> predicatsAnnotationMere) {
+		Set<String> resultats = new HashSet<>();
+		List<Predicat> predicatsAnnotation;
+		String implication;
+		for (Annotation annotation : annotations) {
+			predicatsAnnotation = annotation.getProposition().getPredicats();
+			for (Predicat predicatAnnotation : predicatsAnnotation) {
+				for (Predicat predicatAnnotationMere : predicatsAnnotationMere) {
+					implication = predicatAnnotation.getNom() + " => " + predicatAnnotationMere;
+					resultats.add(implication);
+				}
+			}
+
+			if (estAnnotationComposer(annotation)) {
+				for (Annotation annotation2 : annotation.getAnnotationsEnfant()) {
+					this.concatenerSetsString(resultats,
+							genererImplications(annotation.getAnnotationsEnfant(), predicatsAnnotation));
+				}
+			}
+		}
+		return resultats;
+	}
+
+	public void creerFichierImplication(Set<String> implications, String fichierSortieImplication) {
+		try {
+			FileWriter fw = new FileWriter(fichierSortieImplication, true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			PrintWriter out = new PrintWriter(bw);
+			for (String implication : implications) {
+				out.println(implication);
+			}
+			out.close();
+			bw.close();
+			fw.close();
+		} catch (IOException e) {
+			System.out.println("Exception écriture fichier");
 			e.printStackTrace();
 		}
 	}
