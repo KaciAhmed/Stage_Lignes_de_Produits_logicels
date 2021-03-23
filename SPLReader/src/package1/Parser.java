@@ -45,10 +45,12 @@ public class Parser {
 		String fichierSortiePrincipal = STRING_VIDE;
 		String fichierSortieSynthese = STRING_VIDE;
 		String fichierSortieImplication = STRING_VIDE;
+		String fichierSortieLite = STRING_VIDE;
 
 		final String nomFichierSortie = "output_";
 		final String nomFichierSynthese = "output_synthese";
 		final String nomFichierImplication = "output_implication";
+		final String nomFichierSortieLite = "output_lite";
 
 		if (args.length > 0) {
 			inputDirectory = args[0];
@@ -62,6 +64,8 @@ public class Parser {
 					+ File.separator + nomFichierSynthese;
 			fichierSortieImplication = nomDossierSortiePrincipalParDefaut + File.separator + nomDossierSortie
 					+ File.separator + nomFichierImplication;
+			fichierSortieLite = nomDossierSortiePrincipalParDefaut + File.separator + nomDossierSortie + File.separator
+					+ nomFichierSortieLite;
 		} else {
 			System.out.println("Usage <path/to/code/> <optional/path/to/result.xml>");
 		}
@@ -83,10 +87,9 @@ public class Parser {
 		jaxbObjectToXML(annotationsSynthesesWrapper, fichierSortieSynthese);
 
 		Set<String> implications = parseur.genererImplications(annotations, new ArrayList<Predicat>());
-		for (String str : implications) {
-			System.out.println(str);
-		}
 		parseur.creerFichierImplication(implications, fichierSortieImplication);
+
+		parseur.ecrireFichierAnnotationsLite(annotations, fichierSortieLite);
 	}
 
 	public List<Annotation> parser(String inputDirectory) {
@@ -429,7 +432,7 @@ public class Parser {
 
 	/***********************************
 	 * implication des annotations
-	 */
+	 ***************************************************************************************************/
 	public boolean estAnnotationComposer(Annotation annotation) {
 		try {
 			return !annotation.getAnnotationsEnfant().isEmpty();
@@ -470,7 +473,7 @@ public class Parser {
 
 	public void creerFichierImplication(Set<String> implications, String fichierSortieImplication) {
 		try {
-			FileWriter fw = new FileWriter(fichierSortieImplication, true);
+			FileWriter fw = new FileWriter(fichierSortieImplication, false);
 			BufferedWriter bw = new BufferedWriter(fw);
 			PrintWriter out = new PrintWriter(bw);
 			for (String implication : implications) {
@@ -481,6 +484,63 @@ public class Parser {
 			fw.close();
 		} catch (IOException e) {
 			System.out.println("Exception écriture fichier");
+			e.printStackTrace();
+		}
+	}
+
+	/***********************************
+	 * fichier annotations lite
+	 ***************************************************************************************************/
+	private void concatenerListesString(List<String> lst1, List<String> lst2) {
+		for (String str : lst2) {
+			lst1.add(str);
+		}
+	}
+
+	public boolean estMemeFichier(String fichier1, String fichier2) {
+		return fichier1.equals(fichier2);
+	}
+
+	public List<String> creerListeAnnotationsLite(List<Annotation> annotations, int nbIndentation, String nomFichier) {
+		List<String> listeAnnotationsLite = new ArrayList<>();
+		String tab = "";
+		for (int i = 0; i < nbIndentation; i++) {
+			tab += "\t";
+		}
+		nbIndentation++;
+		for (Annotation annotation : annotations) {
+			if (!estMemeFichier(nomFichier, annotation.getNomDeFichier())) {
+				listeAnnotationsLite.add("FICHIER : " + annotation.getNomDeFichier());
+				nomFichier = annotation.getNomDeFichier();
+			}
+			if (estAnnotationComposer(annotation)) {
+				listeAnnotationsLite.add(tab + "|--" + annotation.getProposition().getFormule());
+				this.concatenerListesString(listeAnnotationsLite,
+						creerListeAnnotationsLite(annotation.getAnnotationsEnfant(), nbIndentation, nomFichier));
+			} else {
+				listeAnnotationsLite.add(tab + "|--" + annotation.getProposition().getFormule());
+			}
+		}
+		return listeAnnotationsLite;
+	}
+
+	public void ecrireFichierAnnotationsLite(List<Annotation> annotations, String fichierSortieAnnotationLite) {
+		int nbIndentation = 0;
+		String nomFichierComparer = "";
+		List<String> listeResultat = creerListeAnnotationsLite(annotations, nbIndentation, nomFichierComparer);
+
+		try {
+			FileWriter fw = new FileWriter(fichierSortieAnnotationLite, false);
+			BufferedWriter bw = new BufferedWriter(fw);
+			PrintWriter out = new PrintWriter(bw);
+			for (String elt : listeResultat) {
+				out.println(elt);
+			}
+			out.close();
+			bw.close();
+			fw.close();
+		} catch (IOException e) {
+			System.out.println("Exception ecriture fichier");
 			e.printStackTrace();
 		}
 	}
