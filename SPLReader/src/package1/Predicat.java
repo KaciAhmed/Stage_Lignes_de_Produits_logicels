@@ -36,7 +36,7 @@ public class Predicat implements Serializable {
 
 	@Override
 	public String toString() {
-		return "[ " + this.nom + "]";
+		return this.nom;
 	}
 
 	@Override

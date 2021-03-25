@@ -13,6 +13,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "proposition")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Proposition {
+	private static final String REGEX_OU = "|";
+	private static final String ESPACE_DEBUT = "^\\s+";
+	private static final String ESPACE_FIN = "\\s+$";
+	private static final String TABULATION_DEBUT = "^\\t+";
+	private static final String TABULATION_FIN = "\\t+$";
+	private static final String CHAINE_VIDE = "";
 	private String formule;
 	@XmlElementWrapper(name = "predicats")
 	@XmlElement(name = "predicat")
@@ -41,11 +47,15 @@ public class Proposition {
 
 	public void parserFormule(String ligne) {
 		final String patternIF = "#if";
-		final String regexSeparateur = "<|>|<=|>=|==|&&|\\|\\|";
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("<").append(REGEX_OU).append(">").append(REGEX_OU).append("=").append(REGEX_OU).append("<=").append(REGEX_OU)
+				.append(">=").append(REGEX_OU).append("==").append(REGEX_OU).append("&&").append(REGEX_OU).append("\\|\\|");
+		final String regexSeparateur = stringBuilder.toString();
 		int positionIF = ligne.indexOf(patternIF);
 		positionIF += patternIF.length();
 		String contenuFormule = ligne.substring(positionIF);
-		this.setFormule(contenuFormule.trim());
+		contenuFormule = contenuFormule.replaceAll(ESPACE_DEBUT + REGEX_OU + ESPACE_FIN, CHAINE_VIDE);
+		this.setFormule(contenuFormule);
 		String[] tabPredicats = this.formule.split(regexSeparateur);
 		Predicat predicat;
 		for (int i = 0; i < tabPredicats.length; i++) {

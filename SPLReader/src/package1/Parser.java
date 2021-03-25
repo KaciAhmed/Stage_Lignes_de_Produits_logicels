@@ -286,6 +286,7 @@ public class Parser {
 	private Annotation creerAnnotation(String nomDeFichier, String ligne, int degre, int indice,
 			int nbCharLigneCourante) {
 		final int NB_LIGNE_DEBUT = 1;
+		ligne.trim();
 		List<String> lst = new ArrayList<>();
 		lst.add(ligne);
 		CodeVariant codeVariant = new CodeVariant(lst);
