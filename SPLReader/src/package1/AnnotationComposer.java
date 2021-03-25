@@ -41,6 +41,16 @@ public class AnnotationComposer extends Annotation implements Serializable {
 	}
 
 	@Override
+	public List<Annotation> getAnnotationsEnfant() {
+		return this.annotationsEnfant;
+	}
+
+	@Override
+	public void setAnnotationsEnfant(List<Annotation> annotationsEnfant) {
+		this.annotationsEnfant = annotationsEnfant;
+	}
+
+	@Override
 	public String toString() {
 		return "AnnotationComposer [\n Nom du Fichier= " + this.getNomDeFichier() + ",\n Proposition= "
 				+ this.getProposition() + ",\n DebutDeLigne= " + this.getDebutDeLigne() + ",\n NombreDeLigne = "
@@ -55,15 +65,4 @@ public class AnnotationComposer extends Annotation implements Serializable {
 			annotation.afficherArborescence();
 		}
 	}
-
-	@Override
-	public List<Annotation> getAnnotationsEnfant() {
-		return this.annotationsEnfant;
-	}
-
-	@Override
-	public void setAnnotationsEnfant(List<Annotation> annotationsEnfant) {
-		this.annotationsEnfant = annotationsEnfant;
-	}
-
 }

@@ -30,6 +30,10 @@ public class Predicat implements Serializable {
 		this.nom = nom;
 	}
 
+	public String creerImplicationAvec(Predicat predicatAnnotationMere) {
+		return this.getNom() + " => " + predicatAnnotationMere;
+	}
+
 	@Override
 	public String toString() {
 		return "[ " + this.nom + "]";
@@ -61,9 +65,4 @@ public class Predicat implements Serializable {
 		}
 		return true;
 	}
-
-	public String creerImplicationAvec(Predicat predicatAnnotationMere) {
-		return this.getNom() + " => " + predicatAnnotationMere;
-	}
-
 }

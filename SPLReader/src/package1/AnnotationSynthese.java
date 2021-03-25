@@ -123,6 +123,15 @@ public class AnnotationSynthese {
 		this.nombreAnnotationComposer = nbAnnotationComp;
 	}
 
+	public void ajouterNombresDeAnnotation(Annotation annotation) {
+		int nbLigne = annotation.getNombreDeLigne();
+		int nbCaractere = annotation.getNombreDeCaractere();
+		int degree = annotation.getDegre();
+		this.ajouterListeNombreDeLigne(nbLigne);
+		this.ajouterListeNombreDeCaractere(nbCaractere);
+		this.ajouterListeNombreDeDegree(degree);
+	}
+
 	public void ajouterListeNombreDeLigne(int nombreDeLigne) {
 		this.listeNombreDeLigne.add(nombreDeLigne);
 	}
@@ -179,14 +188,5 @@ public class AnnotationSynthese {
 				+ ", \n MoyNombreLigne=" + this.MoyenneNombreLigne + ", \n MoyNombreCaractere="
 				+ this.MoyenneNombreCaractere + ", \n nbAnnotationSimple=" + this.nombreAnnotationSimple
 				+ ", nbAnnotationComp=" + this.nombreAnnotationComposer + "]";
-	}
-
-	public void ajouterNombresDeAnnotation(Annotation annotation) {
-		int nbLigne = annotation.getNombreDeLigne();
-		int nbCaractere = annotation.getNombreDeCaractere();
-		int degree = annotation.getDegre();
-		this.ajouterListeNombreDeLigne(nbLigne);
-		this.ajouterListeNombreDeCaractere(nbCaractere);
-		this.ajouterListeNombreDeDegree(degree);
 	}
 }
