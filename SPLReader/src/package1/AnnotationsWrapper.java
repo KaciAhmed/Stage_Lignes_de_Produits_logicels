@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "root")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AnnotationsWrapper {
+	@SuppressWarnings("unused")
 	private String input = "";
 
 	@XmlElement(name = "annotations")

@@ -1,11 +1,13 @@
 package package1;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+@SuppressWarnings("serial")
 @XmlRootElement(name = "predicat")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Predicat implements Serializable {
@@ -35,10 +37,7 @@ public class Predicat implements Serializable {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = (prime * result) + ((this.nom == null) ? 0 : this.nom.hashCode());
-		return result;
+		return Objects.hash(this.nom);
 	}
 
 	@Override
@@ -49,7 +48,7 @@ public class Predicat implements Serializable {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		Predicat other = (Predicat) obj;
@@ -61,6 +60,10 @@ public class Predicat implements Serializable {
 			return false;
 		}
 		return true;
+	}
+
+	public String creerImplicationAvec(Predicat predicatAnnotationMere) {
+		return this.getNom() + " => " + predicatAnnotationMere;
 	}
 
 }

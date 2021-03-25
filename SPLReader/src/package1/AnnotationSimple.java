@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
+@SuppressWarnings("serial")
 @XmlSeeAlso({ Annotation.class })
 @XmlRootElement(name = "annotationSimple")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -26,9 +27,10 @@ public class AnnotationSimple extends Annotation implements Serializable {
 
 	@Override
 	public String toString() {
-		return "AnnotationSimple [\n NomDeFichier= " + getNomDeFichier() + ",\n DebutDeLigne= " + getDebutDeLigne()
-				+ ",\n NombreDeLigne= " + getNombreDeLigne() + ", \n NombreDeCaractere= " + getNombreDeCaractere()
-				+ ",\n Degre= " + getDegre() + ",\n Proposition= " + getProposition() + "]";
+		return "AnnotationSimple [\n NomDeFichier= " + this.getNomDeFichier() + ",\n DebutDeLigne= "
+				+ this.getDebutDeLigne() + ",\n NombreDeLigne= " + this.getNombreDeLigne() + ", \n NombreDeCaractere= "
+				+ this.getNombreDeCaractere() + ",\n Degre= " + this.getDegre() + ",\n Proposition= "
+				+ this.getProposition() + "]";
 	}
 
 	@Override

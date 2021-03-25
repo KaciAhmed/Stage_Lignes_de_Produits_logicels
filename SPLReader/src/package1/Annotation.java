@@ -2,6 +2,7 @@ package package1;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -10,6 +11,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+@SuppressWarnings("serial")
 @XmlSeeAlso({ AnnotationSimple.class, AnnotationComposer.class })
 @XmlRootElement(name = "annotation")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -107,6 +109,14 @@ public abstract class Annotation implements Serializable {
 		this.proposition = proposition;
 	}
 
+	public List<Predicat> getPredicats() {
+		return this.proposition.getPredicats();
+	}
+
+	public String getFormule() {
+		return this.getProposition().getFormule();
+	}
+
 	public abstract void afficherArborescence();
 
 	public void ajouterEnfant(Annotation annotation) {
@@ -125,12 +135,17 @@ public abstract class Annotation implements Serializable {
 		this.codeVariant.ajouter(ligne);
 	}
 
+	public boolean estComposer() {
+		try {
+			return !this.getAnnotationsEnfant().isEmpty();
+		} catch (UnsupportedOperationException e) {
+			return false;
+		}
+	}
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = (prime * result) + ((this.proposition == null) ? 0 : this.proposition.hashCode());
-		return result;
+		return Objects.hash(this.proposition);
 	}
 
 	@Override
@@ -141,7 +156,7 @@ public abstract class Annotation implements Serializable {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		Annotation other = (Annotation) obj;

@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
+@SuppressWarnings("serial")
 @XmlSeeAlso({ Annotation.class })
 @XmlRootElement(name = "annotationComposer")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -41,9 +42,10 @@ public class AnnotationComposer extends Annotation implements Serializable {
 
 	@Override
 	public String toString() {
-		return "AnnotationComposer [\n Nom du Fichier= " + getNomDeFichier() + ",\n Proposition= " + getProposition()
-				+ ",\n DebutDeLigne= " + getDebutDeLigne() + ",\n NombreDeLigne = " + getNombreDeLigne()
-				+ ",\n NombreDeCaractère= " + getNombreDeCaractere() + ",\n Degre = " + getDegre() + "]";
+		return "AnnotationComposer [\n Nom du Fichier= " + this.getNomDeFichier() + ",\n Proposition= "
+				+ this.getProposition() + ",\n DebutDeLigne= " + this.getDebutDeLigne() + ",\n NombreDeLigne = "
+				+ this.getNombreDeLigne() + ",\n NombreDeCaractère= " + this.getNombreDeCaractere() + ",\n Degre = "
+				+ this.getDegre() + "]";
 	}
 
 	@Override

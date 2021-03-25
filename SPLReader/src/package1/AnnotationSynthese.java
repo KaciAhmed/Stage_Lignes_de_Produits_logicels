@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "synthese")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = { "proposition", "listeNombreDeLigne", "listeNombreDeCaractere", "listeDegree", "MoyenneDegree",
-		"MoyenneNombreLigne", "MoyenneNombreCaractere", "nbAnnotationSimple", "nbAnnotationComp" })
+		"MoyenneNombreLigne", "MoyenneNombreCaractere", "nombreAnnotationSimple", "nombreAnnotationComposer" })
 public class AnnotationSynthese {
 
 	private Proposition proposition;
@@ -26,8 +26,8 @@ public class AnnotationSynthese {
 	private float MoyenneNombreLigne;
 	private float MoyenneNombreCaractere;
 
-	private int nbAnnotationSimple;
-	private int nbAnnotationComp;
+	private int nombreAnnotationSimple;
+	private int nombreAnnotationComposer;
 
 	public AnnotationSynthese() {
 		super();
@@ -47,8 +47,8 @@ public class AnnotationSynthese {
 		this.MoyenneDegree = moyDegree;
 		this.MoyenneNombreLigne = moyNombreLigne;
 		this.MoyenneNombreCaractere = moyNombreCaractere;
-		this.nbAnnotationSimple = nbAnnotationSimple;
-		this.nbAnnotationComp = nbAnnotationComp;
+		this.nombreAnnotationSimple = nbAnnotationSimple;
+		this.nombreAnnotationComposer = nbAnnotationComp;
 	}
 
 	public Proposition getProposition() {
@@ -59,77 +59,134 @@ public class AnnotationSynthese {
 		this.proposition = proposition;
 	}
 
-	public List<Integer> getLstNombreDeLigne() {
+	public List<Integer> getListeNombreDeLigne() {
 		return this.listeNombreDeLigne;
 	}
 
-	public void setLstNombreDeLigne(List<Integer> lstNombreDeLigne) {
+	public void setListeNombreDeLigne(List<Integer> lstNombreDeLigne) {
 		this.listeNombreDeLigne = lstNombreDeLigne;
 	}
 
-	public List<Integer> getLstNombreDeCaractere() {
+	public List<Integer> getListeNombreDeCaractere() {
 		return this.listeNombreDeCaractere;
 	}
 
-	public void setLstNombreDeCaractere(List<Integer> lstNombreDeCaractere) {
+	public void setListeNombreDeCaractere(List<Integer> lstNombreDeCaractere) {
 		this.listeNombreDeCaractere = lstNombreDeCaractere;
 	}
 
-	public List<Integer> getLstDegree() {
+	public List<Integer> getListeDegree() {
 		return this.listeDegree;
 	}
 
-	public void setLstDegree(List<Integer> lstDegree) {
+	public void setListeDegree(List<Integer> lstDegree) {
 		this.listeDegree = lstDegree;
 	}
 
-	public float getMoyDegree() {
-		return this.MoyenneDegree;
-	}
-
-	public void setMoyDegree(float moyDegree) {
-		this.MoyenneDegree = moyDegree;
-	}
-
-	public float getMoyNombreLigne() {
+	public float getMoyenneNombreLigne() {
 		return this.MoyenneNombreLigne;
 	}
 
-	public void setMoyNombreLigne(float moyNombreLigne) {
+	public void setMoyenneNombreLigne(float moyNombreLigne) {
 		this.MoyenneNombreLigne = moyNombreLigne;
 	}
 
-	public float getMoyNombreCaractere() {
+	public float getMoyenneNombreCaractere() {
 		return this.MoyenneNombreCaractere;
 	}
 
-	public void setMoyNombreCaractere(float moyNombreCaractere) {
+	public void setMoyenneNombreCaractere(float moyNombreCaractere) {
 		this.MoyenneNombreCaractere = moyNombreCaractere;
 	}
 
-	public int getNbAnnotationSimple() {
-		return this.nbAnnotationSimple;
+	public float getMoyenneDegree() {
+		return this.MoyenneDegree;
 	}
 
-	public void setNbAnnotationSimple(int nbAnnotationSimple) {
-		this.nbAnnotationSimple = nbAnnotationSimple;
+	public void setMoyenneDegree(float moyDegree) {
+		this.MoyenneDegree = moyDegree;
 	}
 
-	public int getNbAnnotationComp() {
-		return this.nbAnnotationComp;
+	public int getNombreAnnotationSimple() {
+		return this.nombreAnnotationSimple;
 	}
 
-	public void setNbAnnotationComp(int nbAnnotationComp) {
-		this.nbAnnotationComp = nbAnnotationComp;
+	public void setNombreAnnotationSimple(int nbAnnotationSimple) {
+		this.nombreAnnotationSimple = nbAnnotationSimple;
+	}
+
+	public int getNombreAnnotationComposer() {
+		return this.nombreAnnotationComposer;
+	}
+
+	public void setNombreAnnotationComposer(int nbAnnotationComp) {
+		this.nombreAnnotationComposer = nbAnnotationComp;
+	}
+
+	public void ajouterListeNombreDeLigne(int nombreDeLigne) {
+		this.listeNombreDeLigne.add(nombreDeLigne);
+	}
+
+	public void ajouterListeNombreDeCaractere(int nombreDeCaractere) {
+		this.listeNombreDeCaractere.add(nombreDeCaractere);
+	}
+
+	public void ajouterListeNombreDeDegree(int degree) {
+		this.listeDegree.add(degree);
+	}
+
+	public int sommerListeNombreDeLigne() {
+		return this.getListeNombreDeLigne().stream().mapToInt(e -> e).sum();
+	}
+
+	public int sommerListeDegree() {
+		return this.getListeDegree().stream().mapToInt(e -> e).sum();
+	}
+
+	public int sommerListeNombreDeCaractere() {
+		return this.getListeNombreDeCaractere().stream().mapToInt(e -> e).sum();
+	}
+
+	public void calculerMoyenneNombreLigne() {
+		int sumLignes = 0;
+		int moyNombreLigne = 0;
+		sumLignes = this.sommerListeNombreDeLigne();
+		moyNombreLigne = sumLignes / this.getListeNombreDeLigne().size();
+		this.setMoyenneNombreLigne(moyNombreLigne);
+	}
+
+	public void calculerMoyenneNombreCaractere() {
+		int sumNbcaracteres = 0;
+		int moyNombreCaractere = 0;
+		sumNbcaracteres = this.sommerListeNombreDeCaractere();
+		moyNombreCaractere = sumNbcaracteres / this.getListeNombreDeLigne().size();
+		this.setMoyenneNombreCaractere(moyNombreCaractere);
+	}
+
+	public void calculerMoyenneDegree() {
+		int sumDegrees = 0;
+		int moyDegree = 0;
+		sumDegrees = this.sommerListeDegree();
+		moyDegree = sumDegrees / this.getListeDegree().size();
+		this.setMoyenneDegree(moyDegree);
 	}
 
 	@Override
 	public String toString() {
-		return "AnnotationSynthese [\n proposition=" + this.proposition + ", \n lstNombreDeLigne="
-				+ this.listeNombreDeLigne + ", \n lstNombreDeCaractere=" + this.listeNombreDeCaractere
-				+ ", \n lstDegree=" + this.listeDegree + ", \n MoyDegree=" + this.MoyenneDegree + ", \n MoyNombreLigne="
-				+ this.MoyenneNombreLigne + ", \n MoyNombreCaractere=" + this.MoyenneNombreCaractere
-				+ ", \n nbAnnotationSimple=" + this.nbAnnotationSimple + ", nbAnnotationComp=" + this.nbAnnotationComp
-				+ "]";
+		return "AnnotationSynthese [\n proposition=" + this.proposition + ", \n listeNombreDeLigne="
+				+ this.listeNombreDeLigne + ", \n listeNombreDeCaractere=" + this.listeNombreDeCaractere
+				+ ", \n listeDegree=" + this.listeDegree + ", \n MoyDegree=" + this.MoyenneDegree
+				+ ", \n MoyNombreLigne=" + this.MoyenneNombreLigne + ", \n MoyNombreCaractere="
+				+ this.MoyenneNombreCaractere + ", \n nbAnnotationSimple=" + this.nombreAnnotationSimple
+				+ ", nbAnnotationComp=" + this.nombreAnnotationComposer + "]";
+	}
+
+	public void ajouterNombresDeAnnotation(Annotation annotation) {
+		int nbLigne = annotation.getNombreDeLigne();
+		int nbCaractere = annotation.getNombreDeCaractere();
+		int degree = annotation.getDegre();
+		this.ajouterListeNombreDeLigne(nbLigne);
+		this.ajouterListeNombreDeCaractere(nbCaractere);
+		this.ajouterListeNombreDeDegree(degree);
 	}
 }

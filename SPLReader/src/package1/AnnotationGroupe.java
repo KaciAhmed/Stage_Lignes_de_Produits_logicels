@@ -2,6 +2,7 @@ package package1;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class AnnotationGroupe {
 	private List<Annotation> annotations;
@@ -18,7 +19,7 @@ public class AnnotationGroupe {
 	}
 
 	public void ajouterAnnotation(Annotation annotation) {
-		if (estPropositionEquivalente(annotation.getProposition())) {
+		if (this.estPropositionEquivalente(annotation.getProposition())) {
 			this.annotations.add(annotation);
 		}
 	}
@@ -46,10 +47,7 @@ public class AnnotationGroupe {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = (prime * result) + ((this.proposition == null) ? 0 : this.proposition.hashCode());
-		return result;
+		return Objects.hash(this.proposition);
 	}
 
 	@Override
@@ -60,7 +58,7 @@ public class AnnotationGroupe {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		AnnotationGroupe other = (AnnotationGroupe) obj;
