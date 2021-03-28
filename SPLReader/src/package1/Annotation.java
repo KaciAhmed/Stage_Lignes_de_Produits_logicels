@@ -109,14 +109,6 @@ public abstract class Annotation implements Serializable {
 		this.proposition = proposition;
 	}
 
-	public List<Predicat> getPredicats() {
-		return this.proposition.getPredicats();
-	}
-
-	public String getFormule() {
-		return this.getProposition().getFormule();
-	}
-
 	public abstract void afficherArborescence();
 
 	public void ajouterEnfant(Annotation annotation) {

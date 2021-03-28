@@ -16,9 +16,10 @@ public class AnnotationsSynthesesWrapper {
 	private List<AnnotationSynthese> annotationsSyntheses = null;
 	@XmlElement(name = "metrics")
 	private MetricsVital metricsVital = null;
+	@XmlElement(name = "score")
+	private long score;
 
 	public AnnotationsSynthesesWrapper() {
-		super();
 		this.annotationsSyntheses = new ArrayList<AnnotationSynthese>();
 	}
 
@@ -27,10 +28,12 @@ public class AnnotationsSynthesesWrapper {
 		this.annotationsSyntheses = annotationsSyntheses;
 	}
 
-	public AnnotationsSynthesesWrapper(List<AnnotationSynthese> annotationsSyntheses, MetricsVital metricsVital) {
+	public AnnotationsSynthesesWrapper(List<AnnotationSynthese> annotationsSyntheses, MetricsVital metricsVital,
+			long score) {
 		super();
 		this.annotationsSyntheses = annotationsSyntheses;
 		this.metricsVital = metricsVital;
+		this.score = score;
 	}
 
 }

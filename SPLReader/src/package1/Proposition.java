@@ -47,14 +47,16 @@ public class Proposition {
 
 	public void parserFormule(String ligne) {
 		final String patternIF = "#if";
+		// remmetre la regEX
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("<").append(REGEX_OU).append(">").append(REGEX_OU).append("=").append(REGEX_OU).append("<=").append(REGEX_OU)
-				.append(">=").append(REGEX_OU).append("==").append(REGEX_OU).append("&&").append(REGEX_OU).append("\\|\\|");
+		stringBuilder.append("<").append(REGEX_OU).append(">").append(REGEX_OU).append("=").append(REGEX_OU)
+				.append("<=").append(REGEX_OU).append(">=").append(REGEX_OU).append("==").append(REGEX_OU).append("&&")
+				.append(REGEX_OU).append("\\|\\|");
 		final String regexSeparateur = stringBuilder.toString();
 		int positionIF = ligne.indexOf(patternIF);
 		positionIF += patternIF.length();
 		String contenuFormule = ligne.substring(positionIF);
-		contenuFormule = contenuFormule.replaceAll(ESPACE_DEBUT + REGEX_OU + ESPACE_FIN, CHAINE_VIDE);
+		contenuFormule = contenuFormule.trim();
 		this.setFormule(contenuFormule);
 		String[] tabPredicats = this.formule.split(regexSeparateur);
 		Predicat predicat;

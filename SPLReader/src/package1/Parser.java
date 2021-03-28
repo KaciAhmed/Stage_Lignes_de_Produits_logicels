@@ -57,6 +57,7 @@ public class Parser {
 		String cheminFichierSynthese = STRING_VIDE;
 		String cheminFichierImplication = STRING_VIDE;
 		String cheminFichierLite = STRING_VIDE;
+		String cheminFichierMetricsAdditionnel = STRING_VIDE;
 
 		final String nomDossierRacine = "out";
 		File dossierParDefaut = new File(nomDossierRacine);
@@ -75,6 +76,7 @@ public class Parser {
 		final String nomFichierSynthese = "output_synthese";
 		final String nomFichierImplication = "output_implication";
 		final String nomFichierSortieLite = "output_lite";
+		final String nomFichierMetricsAdditionnel = "output_MetricsAdditionnel";
 
 		builder = new StringBuilder();
 		if (args.length > 1) {
@@ -102,28 +104,16 @@ public class Parser {
 				.append(nomFichierSortieLite).append(".txt");
 		cheminFichierLite = builder.toString();
 
+		builder = new StringBuilder();
+		builder.append(nomDossierRacine).append(File.separator).append(nomDossierSortie).append(File.separator)
+				.append(nomFichierMetricsAdditionnel).append(".xml");
+		cheminFichierMetricsAdditionnel = builder.toString();
+
 		this.ecrireFichierAnnotations(annotations, cheminFichierAnnotations);
 		this.ecrireFichierSynthese(annotations, cheminFichierSynthese);
 		this.ecrireFichierImplication(annotations, cheminFichierImplication);
 		this.ecrireFichierAnnotationsLite(annotations, cheminFichierLite);
-	}
-
-	private void ecrireFichierAnnotations(List<Annotation> annotations, String cheminFichierSortieAnnotations) {
-		AnnotationsWrapper annotationsWrapper = new AnnotationsWrapper(annotations);
-		annotationsWrapper.setNomFichierInput(inputDirectory);
-		jaxbObjectToXML(annotationsWrapper, cheminFichierSortieAnnotations);
-	}
-
-	private void ecrireFichierSynthese(List<Annotation> annotations, String cheminFichierSortieSynthese) {
-		List<AnnotationSynthese> annotationsSyntheses;
-		List<Annotation> annotationsLineariser = this.lineariserAnnotations(annotations);
-		Set<AnnotationGroupe> annotationsGroupes = this.creerAnnotationsGroupes(annotations);
-		annotationsSyntheses = this.creerAnnotationsSyntheses(annotationsGroupes);
-		MetricsVital metricsVital = new MetricsVital();
-		metricsVital.calculerMetrics(annotationsSyntheses, annotationsGroupes, annotationsLineariser, nbFichierParser);
-		AnnotationsSynthesesWrapper annotationsSynthesesWrapper = new AnnotationsSynthesesWrapper(annotationsSyntheses,
-				metricsVital);
-		jaxbObjectToXML(annotationsSynthesesWrapper, cheminFichierSortieSynthese);
+		this.ecrireFichierMetricsAdditionnel(annotations, cheminFichierMetricsAdditionnel);
 	}
 
 	/****************************
@@ -188,7 +178,9 @@ public class Parser {
 			BufferedReader bufferedReader = new BufferedReader(iReader);
 			String line;
 			while ((line = bufferedReader.readLine()) != null) {
-				contenuFichier.add(line);
+				if (!line.trim().isEmpty()) {
+					contenuFichier.add(line);
+				}
 			}
 			iReader.close();
 			fileReader.close();
@@ -201,6 +193,11 @@ public class Parser {
 	/****************************
 	 * creer arborescence annotation
 	 ***************************************/
+	private void ecrireFichierAnnotations(List<Annotation> annotations, String cheminFichierSortieAnnotations) {
+		AnnotationsWrapper annotationsWrapper = new AnnotationsWrapper(annotations);
+		annotationsWrapper.setNomFichierInput(inputDirectory);
+		jaxbObjectToXML(annotationsWrapper, cheminFichierSortieAnnotations);
+	}
 
 	private void creerArborescenceDesAnnotations(String nomDeFichier, List<String> lignesFichier,
 			List<Annotation> annotations, Stack<Annotation> pileAnnotation, Annotation annotationCourante, int degre,
@@ -356,6 +353,18 @@ public class Parser {
 	/****************************
 	 * Annotation synthese
 	 ***************************************/
+	private void ecrireFichierSynthese(List<Annotation> annotations, String cheminFichierSortieSynthese) {
+		List<AnnotationSynthese> annotationsSyntheses;
+		List<Annotation> annotationsLinearisees = this.lineariserAnnotations(annotations);
+		Set<AnnotationGroupe> annotationsGroupes = this.creerAnnotationsGroupes(annotations);
+		annotationsSyntheses = this.creerAnnotationsSyntheses(annotationsGroupes);
+		MetricsVital metricsVital = new MetricsVital();
+		metricsVital.calculerMetrics(annotationsSyntheses, annotationsGroupes, annotationsLinearisees, nbFichierParser);
+		long score = this.calculerScore(annotationsLinearisees);
+		AnnotationsSynthesesWrapper annotationsSynthesesWrapper = new AnnotationsSynthesesWrapper(annotationsSyntheses,
+				metricsVital, score);
+		jaxbObjectToXML(annotationsSynthesesWrapper, cheminFichierSortieSynthese);
+	}
 
 	private List<AnnotationSynthese> creerAnnotationsSyntheses(Set<AnnotationGroupe> annotationsGroupes) {
 		List<AnnotationSynthese> annotationsSyntheses = new ArrayList<AnnotationSynthese>();
@@ -465,7 +474,7 @@ public class Parser {
 
 		String implication;
 		for (Annotation annotation : annotations) {
-			predicatsAnnotationCourant = annotation.getPredicats();
+			predicatsAnnotationCourant = annotation.getProposition().getPredicats();
 			for (Predicat predicatAnnotation : predicatsAnnotationCourant) {
 				for (Predicat predicatAnnotationMere : predicatsAnnotationMere) {
 					implication = predicatAnnotation.creerImplicationAvec(predicatAnnotationMere);
@@ -536,7 +545,8 @@ public class Parser {
 				listeAnnotationsLite.add("FICHIER : " + nomDeFichierCourant);
 				nomFichier = nomDeFichierCourant;
 			}
-			String ligneIndenter = indentation + annotation.getFormule();
+			String ligneIndenter = indentation + annotation.getProposition().getFormule() + "\t"
+					+ annotation.getNombreDeLigne();
 			if (annotation.estComposer()) {
 				listeAnnotationsLite.add(ligneIndenter);
 				annotationsEnfantCourant = annotation.getAnnotationsEnfant();
@@ -562,4 +572,92 @@ public class Parser {
 	private boolean estMemeNomDeFichier(String fichier1, String fichier2) {
 		return fichier1.equals(fichier2);
 	}
+
+	/************************************************
+	 *** calcule du score
+	 ************************************************/
+	public long calculerScore(List<Annotation> annotationsLinearisee) {
+		long score = 0;
+		for (Annotation annotation : annotationsLinearisee) {
+			score += annotation.getDegre() * annotation.getNombreDeLigne();
+		}
+		return score;
+	}
+
+	/****************************
+	 * Metrics additionnel
+	 ***************************************/
+
+	private void ecrireFichierMetricsAdditionnel(List<Annotation> annotations,
+			String cheminFichierSortieMetricsAdditionnel) {
+		List<Annotation> annotationsRedondanteEliminable = new ArrayList<>();
+		List<Annotation> annotationsRedondanteSimplifiable = new ArrayList<>();
+		this.identifierAnnotationsRedondantes(annotations, annotationsRedondanteSimplifiable,
+				annotationsRedondanteEliminable);
+		MetricsAdditionnel metricsAdditionnel = new MetricsAdditionnel();
+		double proprotionAnnotationsSimplifiable = metricsAdditionnel
+				.calculerProportionAnnotationSimplifiable(annotations, annotationsRedondanteSimplifiable);
+		proprotionAnnotationsSimplifiable = Math.round(proprotionAnnotationsSimplifiable * 100.0) / 100.0;
+		double proprotionAnnotationsEliminable = metricsAdditionnel.calculerProportionAnnotationEliminable(annotations,
+				annotationsRedondanteEliminable);
+		proprotionAnnotationsEliminable = Math.round(proprotionAnnotationsEliminable * 100.0) / 100.0;
+		Long nbAnnotationsConcatenable = metricsAdditionnel.compterNombreAnnotationConcatenable(annotations);
+		MetricsAdditionnelWrapper metricsAdditionnelWrapper = new MetricsAdditionnelWrapper(
+				annotationsRedondanteSimplifiable, annotationsRedondanteEliminable, proprotionAnnotationsSimplifiable,
+				proprotionAnnotationsEliminable, nbAnnotationsConcatenable);
+		jaxbObjectToXML(metricsAdditionnelWrapper, cheminFichierSortieMetricsAdditionnel);
+	}
+
+	private void identifierAnnotationsRedondantes(List<Annotation> annotations,
+			List<Annotation> annotationsRedondanteSimplifiable, List<Annotation> annotationsRedondanteEliminable) {
+		for (Annotation annotation : annotations) {
+			if (annotation.estComposer()) {
+				if (formuleConjonctiveEtPredicatEgaux(annotation.getProposition().getFormule(),
+						annotation.getProposition().getPredicats())) {
+					for (Annotation annotationEnfant : annotation.getAnnotationsEnfant()) {
+						if (annotation.getProposition().getFormule()
+								.equals(annotationEnfant.getProposition().getFormule())) {
+							annotationsRedondanteEliminable.add(annotationEnfant);
+						} else {
+							for (Predicat predicat : annotationEnfant.getProposition().getPredicats()) {
+								if (annotation.getProposition().getPredicats().contains(predicat)) {
+									annotationsRedondanteSimplifiable.add(annotationEnfant);
+								}
+							}
+
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public boolean formuleConjonctiveEtPredicatEgaux(String formule, List<Predicat> predicats) {
+		String[] tabPredicat = formule.split("&&");
+		if (tabPredicat.length != predicats.size()) {
+			return false;
+		} else {
+			for (int i = 0; i < predicats.size(); i++) {
+				if (!(tabPredicat[i].equals(predicats.get(i).getNom()))) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	private static void jaxbObjectToXML(MetricsAdditionnelWrapper metricsAdditionnelWrapper, String outputFileName) {
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(MetricsAdditionnelWrapper.class);
+			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+
+			jaxbMarshaller.marshal(metricsAdditionnelWrapper, new File(outputFileName));
+
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+	}
+
 }
