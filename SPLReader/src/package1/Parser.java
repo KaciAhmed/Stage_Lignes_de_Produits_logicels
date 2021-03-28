@@ -28,12 +28,14 @@ public class Parser {
 	public static final String ESPACE = " ";
 	public static int nbFichierParser = 0;
 	public static String inputDirectory = STRING_VIDE;
+	private static List<String> lignesTotalsFichier = null;
 
 	public static void main(String[] args) {
 		List<Annotation> annotations;
 		Parser parseur = new Parser();
 		if (args.length > 0) {
 			inputDirectory = args[0];
+			lignesTotalsFichier = new ArrayList<>();
 			annotations = parseur.parser(inputDirectory);
 			parseur.calculerEtEcrireFichiersResultat(args, annotations);
 		} else {
@@ -122,9 +124,9 @@ public class Parser {
 
 	private List<Annotation> lireDossier(File dossier) {
 		String nomDeFichier;
+		List<String> lignesFichier = null;
 		List<Annotation> annotations = new ArrayList<>();
 		List<Annotation> annotationsCalculer = new ArrayList<>();
-		List<String> lignesFichier = null;
 		Annotation annotationCourante;
 		Stack<Annotation> pileAnnotation;
 		List<Annotation> annotationsPrecalculer = null;
@@ -143,6 +145,7 @@ public class Parser {
 					pileAnnotation = new Stack<Annotation>();
 					annotationCourante = null;
 					lignesFichier = this.lireFichier(nomDeFichier);
+					lignesTotalsFichier.addAll(lignesFichier);
 					this.creerArborescenceDesAnnotations(nomDeFichier, lignesFichier, annotations, pileAnnotation,
 							annotationCourante, degre, indiceCurseurDeLigne);
 					annotationsPrecalculer = this.simplifierAnnotations(annotations);
@@ -178,9 +181,7 @@ public class Parser {
 			BufferedReader bufferedReader = new BufferedReader(iReader);
 			String line;
 			while ((line = bufferedReader.readLine()) != null) {
-				if (!line.trim().isEmpty()) {
-					contenuFichier.add(line);
-				}
+				contenuFichier.add(line);
 			}
 			iReader.close();
 			fileReader.close();
@@ -203,7 +204,7 @@ public class Parser {
 			List<Annotation> annotations, Stack<Annotation> pileAnnotation, Annotation annotationCourante, int degre,
 			int indiceCurseurDeLigne) {
 		if (this.estCurseurFin(lignesFichier, indiceCurseurDeLigne)) {
-			System.out.println("Tout est visite");
+			// Tout est visité
 		} else {
 			String ligneCourante = lignesFichier.get(indiceCurseurDeLigne);
 			ligneCourante = ligneCourante.replaceAll(REGEX_TAB, STRING_VIDE);
@@ -601,7 +602,11 @@ public class Parser {
 		double proprotionAnnotationsEliminable = metricsAdditionnel.calculerProportionAnnotationEliminable(annotations,
 				annotationsRedondanteEliminable);
 		proprotionAnnotationsEliminable = Math.round(proprotionAnnotationsEliminable * 100.0) / 100.0;
-		Long nbAnnotationsConcatenable = metricsAdditionnel.compterNombreAnnotationConcatenable(annotations);
+
+		List<String> lignesSansVides = obtenirCodeSansLignesVides();
+		List<Annotation> annotationsSansVides = new ArrayList<>();
+		creerArborescenceDesAnnotations("", lignesSansVides, annotationsSansVides, new Stack<>(), null, 0, 0);
+		Long nbAnnotationsConcatenable = metricsAdditionnel.compterNombreAnnotationConcatenable(annotationsSansVides);
 		MetricsAdditionnelWrapper metricsAdditionnelWrapper = new MetricsAdditionnelWrapper(
 				annotationsRedondanteSimplifiable, annotationsRedondanteEliminable, proprotionAnnotationsSimplifiable,
 				proprotionAnnotationsEliminable, nbAnnotationsConcatenable);
@@ -644,6 +649,16 @@ public class Parser {
 			}
 		}
 		return true;
+	}
+
+	public List<String> obtenirCodeSansLignesVides() {
+		List<String> ligneSansVides = new ArrayList<>();
+		for (String ligne : lignesTotalsFichier) {
+			if (!ligne.trim().isEmpty()) {
+				ligneSansVides.add(ligne);
+			}
+		}
+		return ligneSansVides;
 	}
 
 	private static void jaxbObjectToXML(MetricsAdditionnelWrapper metricsAdditionnelWrapper, String outputFileName) {
