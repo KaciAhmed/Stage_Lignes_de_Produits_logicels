@@ -40,4 +40,29 @@ public class CodeVariant implements Serializable {
 	public void ajouter(String ligne) {
 		this.ligneDeCode.add(ligne);
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((ligneDeCode == null) ? 0 : ligneDeCode.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CodeVariant other = (CodeVariant) obj;
+		if (ligneDeCode == null) {
+			if (other.ligneDeCode != null)
+				return false;
+		} else if (!ligneDeCode.equals(other.ligneDeCode))
+			return false;
+		return true;
+	}
 }
