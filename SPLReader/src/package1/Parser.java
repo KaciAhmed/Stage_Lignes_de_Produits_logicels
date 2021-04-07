@@ -11,14 +11,18 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+
+import org.omg.PortableServer.POA;
 
 public class Parser {
 	private static final String DEBUT_ANNOTATION_NON_ESPACER = "//";
@@ -589,27 +593,32 @@ public class Parser {
 	 * Metrics additionnel
 	 ***************************************/
 
-	private void ecrireFichierMetricsAdditionnel(List<Annotation> annotations,
-			String cheminFichierSortieMetricsAdditionnel) {
+	private void ecrireFichierMetricsAdditionnel(List<Annotation> annotations,String cheminFichierSortieMetricsAdditionnel) {
+		
 		List<Annotation> annotationsRedondanteEliminable = new ArrayList<>();
 		List<Annotation> annotationsRedondanteSimplifiable = new ArrayList<>();
-		this.identifierAnnotationsRedondantes(annotations, annotationsRedondanteSimplifiable,
-				annotationsRedondanteEliminable);
+		this.identifierAnnotationsRedondantes(annotations, annotationsRedondanteSimplifiable,annotationsRedondanteEliminable);
+		
 		MetricsAdditionnel metricsAdditionnel = new MetricsAdditionnel();
-		double proprotionAnnotationsSimplifiable = metricsAdditionnel
-				.calculerProportionAnnotationSimplifiable(annotations, annotationsRedondanteSimplifiable);
+		double proprotionAnnotationsSimplifiable = metricsAdditionnel.calculerProportionAnnotationSimplifiable(annotations,annotationsRedondanteSimplifiable);
 		proprotionAnnotationsSimplifiable = Math.round(proprotionAnnotationsSimplifiable * 100.0) / 100.0;
-		double proprotionAnnotationsEliminable = metricsAdditionnel.calculerProportionAnnotationEliminable(annotations,
-				annotationsRedondanteEliminable);
+		
+		double proprotionAnnotationsEliminable = metricsAdditionnel.calculerProportionAnnotationEliminable(annotations,annotationsRedondanteEliminable);
 		proprotionAnnotationsEliminable = Math.round(proprotionAnnotationsEliminable * 100.0) / 100.0;
 
 		List<String> lignesSansVides = obtenirCodeSansLignesVides();
 		List<Annotation> annotationsSansVides = new ArrayList<>();
 		creerArborescenceDesAnnotations("", lignesSansVides, annotationsSansVides, new Stack<>(), null, 0, 0);
 		Long nbAnnotationsConcatenable = metricsAdditionnel.compterNombreAnnotationConcatenable(annotationsSansVides);
+		
+		List<Annotation>annotationsLineariser=this.lineariserAnnotations(annotations);
+		double pourcentageSimilariteCode = metricsAdditionnel.getPourcentageSimilariteCode(annotationsLineariser);
+		pourcentageSimilariteCode= Math.round(pourcentageSimilariteCode * 100.0) / 100.0;
+		
+		
 		MetricsAdditionnelWrapper metricsAdditionnelWrapper = new MetricsAdditionnelWrapper(
 				annotationsRedondanteSimplifiable, annotationsRedondanteEliminable, proprotionAnnotationsSimplifiable,
-				proprotionAnnotationsEliminable, nbAnnotationsConcatenable);
+				proprotionAnnotationsEliminable, nbAnnotationsConcatenable,pourcentageSimilariteCode);
 		jaxbObjectToXML(metricsAdditionnelWrapper, cheminFichierSortieMetricsAdditionnel);
 	}
 
@@ -665,14 +674,12 @@ public class Parser {
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(MetricsAdditionnelWrapper.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-
 			jaxbMarshaller.marshal(metricsAdditionnelWrapper, new File(outputFileName));
-
 		} catch (JAXBException e) {
 			e.printStackTrace();
 		}
 	}
 
+	
 }

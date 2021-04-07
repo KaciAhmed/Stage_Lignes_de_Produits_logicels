@@ -161,4 +161,32 @@ public abstract class Annotation implements Serializable {
 		}
 		return true;
 	}
+	
+	
+	public boolean estMemeAnnotation(Annotation other) {
+		if (codeVariant == null) {
+			if (other.codeVariant != null)
+				return false;
+		} else if (!codeVariant.equals(other.codeVariant))
+			return false;
+		if (debutDeLigne != other.debutDeLigne)
+			return false;
+		if (degre != other.degre)
+			return false;
+		if (nomDeFichier == null) {
+			if (other.nomDeFichier != null)
+				return false;
+		} else if (!nomDeFichier.equals(other.nomDeFichier))
+			return false;
+		if (nombreDeCaractere != other.nombreDeCaractere)
+			return false;
+		if (nombreDeLigne != other.nombreDeLigne)
+			return false;
+		if (proposition == null) {
+			if (other.proposition != null)
+				return false;
+		} else if (!proposition.equals(other.proposition))
+			return false;
+		return true;
+	}
 }
