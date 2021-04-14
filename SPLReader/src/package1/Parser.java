@@ -4,17 +4,17 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -22,12 +22,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.omg.PortableServer.POA;
-
 public class Parser {
 	private static final String DEBUT_ANNOTATION_NON_ESPACER = "//";
-	private static final String DEBUT_ANNOTATION_ESPACER = "//\\s";
-	public static final String REGEX_TAB = "\\t";
+	private static final String DEBUT_ANNOTATION_ESPACER = "//\\s++";
+	public static final String REGEX_TAB = "\\t++";
 	public static final String STRING_VIDE = "";
 	public static final String ESPACE = " ";
 	public static int nbFichierParser = 0;
@@ -64,6 +62,7 @@ public class Parser {
 		String cheminFichierImplication = STRING_VIDE;
 		String cheminFichierLite = STRING_VIDE;
 		String cheminFichierMetricsAdditionnel = STRING_VIDE;
+		String cheminFichierImage = STRING_VIDE;
 
 		final String nomDossierRacine = "out";
 		File dossierParDefaut = new File(nomDossierRacine);
@@ -83,6 +82,7 @@ public class Parser {
 		final String nomFichierImplication = "output_implication";
 		final String nomFichierSortieLite = "output_lite";
 		final String nomFichierMetricsAdditionnel = "output_MetricsAdditionnel";
+		final String nomFichierImage = "imageMatriceSimilarite";
 
 		builder = new StringBuilder();
 		if (args.length > 1) {
@@ -115,11 +115,15 @@ public class Parser {
 				.append(nomFichierMetricsAdditionnel).append(".xml");
 		cheminFichierMetricsAdditionnel = builder.toString();
 
+		builder = new StringBuilder();
+		builder.append(nomDossierRacine).append(File.separator).append(nomDossierSortie).append(File.separator)
+				.append(nomFichierImage).append(".pgm");
+		cheminFichierImage = builder.toString();
 		this.ecrireFichierAnnotations(annotations, cheminFichierAnnotations);
 		this.ecrireFichierSynthese(annotations, cheminFichierSynthese);
 		this.ecrireFichierImplication(annotations, cheminFichierImplication);
 		this.ecrireFichierAnnotationsLite(annotations, cheminFichierLite);
-		this.ecrireFichierMetricsAdditionnel(annotations, cheminFichierMetricsAdditionnel);
+		this.ecrireFichierMetricsAdditionnel(annotations, cheminFichierMetricsAdditionnel, cheminFichierImage);
 	}
 
 	/****************************
@@ -227,7 +231,6 @@ public class Parser {
 			} else if (this.estFinAnnotation(motsCles)) {
 				this.miseAjourPileAnnotation(pileAnnotation, nbCharLigneCourante);
 				annotationCourante = pileAnnotation.pop();
-				annotationCourante.ajouterLigneDeCodeVariant(ligneCourante);
 				if (!pileAnnotation.isEmpty()) {
 					Annotation annotationParent = pileAnnotation.pop();
 					annotationParent.ajouterEnfant(annotationCourante);
@@ -241,6 +244,11 @@ public class Parser {
 						annotationCourante, degre, indiceCurseurDeLigne);
 			} else if (this.estMillieuAnnotation(motsCles)) {
 				this.miseAjourPileAnnotation(pileAnnotation, nbCharLigneCourante);
+				if (!pileAnnotation.isEmpty()) {
+					Annotation annotationParent = pileAnnotation.pop();
+					annotationParent.ajouterLigneDeCodeVariant(ligneCourante);
+					pileAnnotation.push(annotationParent);
+				}
 				indiceCurseurDeLigne++;
 				this.creerArborescenceDesAnnotations(nomDeFichier, lignesFichier, annotations, pileAnnotation,
 						annotationCourante, degre, indiceCurseurDeLigne);
@@ -289,9 +297,7 @@ public class Parser {
 			int nbCharLigneCourante) {
 		final int NB_LIGNE_DEBUT = 1;
 		ligne.trim();
-		List<String> lst = new ArrayList<>();
-		lst.add(ligne);
-		CodeVariant codeVariant = new CodeVariant(lst);
+		CodeVariant codeVariant = new CodeVariant();
 		Proposition proposition = this.creerProposition(ligne);
 		Annotation annotationCourante = new AnnotationComposer(nomDeFichier, indice, NB_LIGNE_DEBUT,
 				nbCharLigneCourante, degre, codeVariant, proposition);
@@ -593,32 +599,44 @@ public class Parser {
 	 * Metrics additionnel
 	 ***************************************/
 
-	private void ecrireFichierMetricsAdditionnel(List<Annotation> annotations,String cheminFichierSortieMetricsAdditionnel) {
-		
+	private void ecrireFichierMetricsAdditionnel(List<Annotation> annotations,
+			String cheminFichierSortieMetricsAdditionnel, String cheminFichierImage) {
+
 		List<Annotation> annotationsRedondanteEliminable = new ArrayList<>();
 		List<Annotation> annotationsRedondanteSimplifiable = new ArrayList<>();
-		this.identifierAnnotationsRedondantes(annotations, annotationsRedondanteSimplifiable,annotationsRedondanteEliminable);
-		
+		this.identifierAnnotationsRedondantes(annotations, annotationsRedondanteSimplifiable,
+				annotationsRedondanteEliminable);
+
 		MetricsAdditionnel metricsAdditionnel = new MetricsAdditionnel();
-		double proprotionAnnotationsSimplifiable = metricsAdditionnel.calculerProportionAnnotationSimplifiable(annotations,annotationsRedondanteSimplifiable);
+		double proprotionAnnotationsSimplifiable = metricsAdditionnel
+				.calculerProportionAnnotationSimplifiable(annotations, annotationsRedondanteSimplifiable);
 		proprotionAnnotationsSimplifiable = Math.round(proprotionAnnotationsSimplifiable * 100.0) / 100.0;
-		
-		double proprotionAnnotationsEliminable = metricsAdditionnel.calculerProportionAnnotationEliminable(annotations,annotationsRedondanteEliminable);
+
+		double proprotionAnnotationsEliminable = metricsAdditionnel.calculerProportionAnnotationEliminable(annotations,
+				annotationsRedondanteEliminable);
 		proprotionAnnotationsEliminable = Math.round(proprotionAnnotationsEliminable * 100.0) / 100.0;
 
 		List<String> lignesSansVides = obtenirCodeSansLignesVides();
 		List<Annotation> annotationsSansVides = new ArrayList<>();
 		creerArborescenceDesAnnotations("", lignesSansVides, annotationsSansVides, new Stack<>(), null, 0, 0);
 		Long nbAnnotationsConcatenable = metricsAdditionnel.compterNombreAnnotationConcatenable(annotationsSansVides);
-		
-		List<Annotation>annotationsLineariser=this.lineariserAnnotations(annotations);
-		double pourcentageSimilariteCode = metricsAdditionnel.getPourcentageSimilariteCode(annotationsLineariser);
-		pourcentageSimilariteCode= Math.round(pourcentageSimilariteCode * 100.0) / 100.0;
-		
-		
+
+		List<Annotation> annotationsLineariser = this.lineariserAnnotations(annotations);
+		Matrice matriceSimilariteCode = metricsAdditionnel.getMatriceSimilariteCode(annotationsLineariser);
+
+		try {
+			matriceSimilariteCode.creerImageMatrice(cheminFichierImage);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		MetricsAdditionnelWrapper metricsAdditionnelWrapper = new MetricsAdditionnelWrapper(
 				annotationsRedondanteSimplifiable, annotationsRedondanteEliminable, proprotionAnnotationsSimplifiable,
-				proprotionAnnotationsEliminable, nbAnnotationsConcatenable,pourcentageSimilariteCode);
+				proprotionAnnotationsEliminable, nbAnnotationsConcatenable);
 		jaxbObjectToXML(metricsAdditionnelWrapper, cheminFichierSortieMetricsAdditionnel);
 	}
 
@@ -681,5 +699,4 @@ public class Parser {
 		}
 	}
 
-	
 }

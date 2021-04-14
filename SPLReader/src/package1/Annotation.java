@@ -161,32 +161,41 @@ public abstract class Annotation implements Serializable {
 		}
 		return true;
 	}
-	
-	
+
 	public boolean estMemeAnnotation(Annotation other) {
-		if (codeVariant == null) {
-			if (other.codeVariant != null)
+		if (this.codeVariant == null) {
+			if (other.codeVariant != null) {
 				return false;
-		} else if (!codeVariant.equals(other.codeVariant))
+			}
+		} else if (!this.codeVariant.equals(other.codeVariant)) {
 			return false;
-		if (debutDeLigne != other.debutDeLigne)
+		}
+		if (this.debutDeLigne != other.debutDeLigne) {
 			return false;
-		if (degre != other.degre)
+		}
+		if (this.degre != other.degre) {
 			return false;
-		if (nomDeFichier == null) {
-			if (other.nomDeFichier != null)
+		}
+		if (this.nomDeFichier == null) {
+			if (other.nomDeFichier != null) {
 				return false;
-		} else if (!nomDeFichier.equals(other.nomDeFichier))
+			}
+		} else if (!this.nomDeFichier.equals(other.nomDeFichier)) {
 			return false;
-		if (nombreDeCaractere != other.nombreDeCaractere)
+		}
+		if (this.nombreDeCaractere != other.nombreDeCaractere) {
 			return false;
-		if (nombreDeLigne != other.nombreDeLigne)
+		}
+		if (this.nombreDeLigne != other.nombreDeLigne) {
 			return false;
-		if (proposition == null) {
-			if (other.proposition != null)
+		}
+		if (this.proposition == null) {
+			if (other.proposition != null) {
 				return false;
-		} else if (!proposition.equals(other.proposition))
+			}
+		} else if (!this.proposition.equals(other.proposition)) {
 			return false;
+		}
 		return true;
 	}
 }

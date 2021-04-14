@@ -45,24 +45,29 @@ public class CodeVariant implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((ligneDeCode == null) ? 0 : ligneDeCode.hashCode());
+		result = (prime * result) + ((this.ligneDeCode == null) ? 0 : this.ligneDeCode.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		CodeVariant other = (CodeVariant) obj;
-		if (ligneDeCode == null) {
-			if (other.ligneDeCode != null)
+		if (this.ligneDeCode == null) {
+			if (other.ligneDeCode != null) {
 				return false;
-		} else if (!ligneDeCode.equals(other.ligneDeCode))
+			}
+		} else if (!this.ligneDeCode.equals(other.ligneDeCode)) {
 			return false;
+		}
 		return true;
 	}
 }

@@ -21,8 +21,6 @@ public class MetricsAdditionnelWrapper {
 	private double proprtionAnnotationEliminable = 0;
 	@XmlElement(name = "nombreAnnotationsConcatenable")
 	private Long nbAnnotationConcatenable;
-	@XmlElement(name = "pourcentageSimilariteDeCode")
-	private Double pourcentageSimilariteDeCode;
 
 	public MetricsAdditionnelWrapper() {
 		super();
@@ -32,16 +30,13 @@ public class MetricsAdditionnelWrapper {
 
 	public MetricsAdditionnelWrapper(List<Annotation> annotationsSimplifiable, List<Annotation> annotationsEliminable,
 			double proportionAnnotationSimplifiable, double proprtionAnnotationEliminable,
-			Long nbAnnotationConcatenable, Double pourcentageSimilariteDeCode) {
+			Long nbAnnotationConcatenable) {
 		super();
 		this.annotationsSimplifiable = annotationsSimplifiable;
 		this.annotationsEliminable = annotationsEliminable;
 		this.proportionAnnotationSimplifiable = proportionAnnotationSimplifiable;
 		this.proprtionAnnotationEliminable = proprtionAnnotationEliminable;
 		this.nbAnnotationConcatenable = nbAnnotationConcatenable;
-		this.pourcentageSimilariteDeCode = pourcentageSimilariteDeCode;
 	}
-
-	
 
 }
