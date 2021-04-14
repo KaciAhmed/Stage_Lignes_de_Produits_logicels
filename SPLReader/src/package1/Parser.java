@@ -212,7 +212,7 @@ public class Parser {
 			List<Annotation> annotations, Stack<Annotation> pileAnnotation, Annotation annotationCourante, int degre,
 			int indiceCurseurDeLigne) {
 		if (this.estCurseurFin(lignesFichier, indiceCurseurDeLigne)) {
-			// Tout est visité
+			// Tout est visitï¿½
 		} else {
 			String ligneCourante = lignesFichier.get(indiceCurseurDeLigne);
 			ligneCourante = ligneCourante.replaceAll(REGEX_TAB, STRING_VIDE);
@@ -616,9 +616,9 @@ public class Parser {
 				annotationsRedondanteEliminable);
 		proprotionAnnotationsEliminable = Math.round(proprotionAnnotationsEliminable * 100.0) / 100.0;
 
-		List<String> lignesSansVides = obtenirCodeSansLignesVides();
+		List<String> lignesSansVides = this.obtenirCodeSansLignesVides();
 		List<Annotation> annotationsSansVides = new ArrayList<>();
-		creerArborescenceDesAnnotations("", lignesSansVides, annotationsSansVides, new Stack<>(), null, 0, 0);
+		this.creerArborescenceDesAnnotations("", lignesSansVides, annotationsSansVides, new Stack<>(), null, 0, 0);
 		Long nbAnnotationsConcatenable = metricsAdditionnel.compterNombreAnnotationConcatenable(annotationsSansVides);
 
 		List<Annotation> annotationsLineariser = this.lineariserAnnotations(annotations);
@@ -644,7 +644,7 @@ public class Parser {
 			List<Annotation> annotationsRedondanteSimplifiable, List<Annotation> annotationsRedondanteEliminable) {
 		for (Annotation annotation : annotations) {
 			if (annotation.estComposer()) {
-				if (formuleConjonctiveEtPredicatEgaux(annotation.getProposition().getFormule(),
+				if (this.formuleConjonctiveEtPredicatEgaux(annotation.getProposition().getFormule(),
 						annotation.getProposition().getPredicats())) {
 					for (Annotation annotationEnfant : annotation.getAnnotationsEnfant()) {
 						if (annotation.getProposition().getFormule()

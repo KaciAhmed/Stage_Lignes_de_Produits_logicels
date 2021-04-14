@@ -33,15 +33,15 @@ public class MetricsAdditionnel {
 				}
 			}
 			if (annotations.get(i).estComposer()) {
-				nbAnnoatationConcatenable += compterNombreAnnotationConcatenable(
-						annotations.get(i).getAnnotationsEnfant());
+				nbAnnoatationConcatenable += this
+						.compterNombreAnnotationConcatenable(annotations.get(i).getAnnotationsEnfant());
 			}
 		}
 		return nbAnnoatationConcatenable;
 	}
 
 	/****
-	 * similarité de code
+	 * similaritï¿½ de code
 	 */
 	public Matrice getMatriceSimilariteCode(List<Annotation> annotationsLineariser) {
 		Matrice matriceSimilariteDeCode = new MatriceSimilarite(annotationsLineariser);
@@ -49,6 +49,6 @@ public class MetricsAdditionnel {
 		return matriceSimilariteDeCode;
 	}
 	/*
-	 * Fin similarité de code
+	 * Fin similaritï¿½ de code
 	 */
 }
