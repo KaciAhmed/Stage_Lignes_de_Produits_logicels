@@ -40,12 +40,12 @@ public class MatriceSimilarite extends Matrice {
 	}
 
 	private double getPourcentageSimilariteCodeVariant(CodeVariant codeVariant1, CodeVariant codeVariant2) {
-		double pourcentage=0;
+		double pourcentage = 0;
 		int sizeVariant1 = codeVariant1.getLigneDeCode().size();
 		int sizeVariant2 = codeVariant2.getLigneDeCode().size();
 
 		long minNbLigne = Math.min(sizeVariant1, sizeVariant2);
-		long maxNbLigne = Math.max(sizeVariant1,sizeVariant2);
+		long maxNbLigne = Math.max(sizeVariant1, sizeVariant2);
 
 		long nbLigneSimilaire = 0;
 		this.supprimerLignesVideCodeVariant(codeVariant1);
@@ -58,7 +58,7 @@ public class MatriceSimilarite extends Matrice {
 			}
 		}
 		pourcentage = (nbLigneSimilaire + 0.0) / (maxNbLigne + 0.0);
-		
+
 		return pourcentage;
 	}
 
@@ -111,16 +111,17 @@ public class MatriceSimilarite extends Matrice {
 		lignes += couleurMax + "\n";
 		for (int i = 0; i < super.getNblignes(); i++) {
 			for (int j = 0; j < super.getNbColonnes(); j++) {
-				if(i>1 && i == j && !dictionnaireAnnotations.get(i).getNomDeFichier().equals(dictionnaireAnnotations.get(i-1).getNomDeFichier())){
-					
-				    lignes += ((int) (super.getMatrice()[i][j] * 100)) + " 0 0 ";
-				  //  System.out.println( "("+(couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " 0 0 )");
+				if ((i > 1) && (i == j) && !this.dictionnaireAnnotations.get(i).getNomDeFichier()
+						.equals(this.dictionnaireAnnotations.get(i - 1).getNomDeFichier())) {
 
-				}else{
-					lignes += (couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " " + (couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " " + (couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " ";
-			//	System.out.println("("+(couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " " + (couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " " + (couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " )");
+					lignes += ((int) (super.getMatrice()[i][j] * 100)) + " 0 0 ";
+
+				} else {
+					lignes += (couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " "
+							+ (couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " "
+							+ (couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " ";
 				}
-				
+
 			}
 			lignes += "\n";
 		}
