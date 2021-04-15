@@ -3,6 +3,7 @@ package package1;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -43,10 +44,7 @@ public class CodeVariant implements Serializable {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = (prime * result) + ((this.ligneDeCode == null) ? 0 : this.ligneDeCode.hashCode());
-		return result;
+		return Objects.hash(this.ligneDeCode);
 	}
 
 	@Override
@@ -57,7 +55,7 @@ public class CodeVariant implements Serializable {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		CodeVariant other = (CodeVariant) obj;

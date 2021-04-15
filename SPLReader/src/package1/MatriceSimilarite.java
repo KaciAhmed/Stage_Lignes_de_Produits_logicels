@@ -1,10 +1,15 @@
 package package1;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 public class MatriceSimilarite extends Matrice {
 	List<Annotation> dictionnaireAnnotations;
@@ -32,9 +37,10 @@ public class MatriceSimilarite extends Matrice {
 		double pourcentage = 0;
 		for (int i = 0; i < super.getNblignes(); i++) {
 			for (int j = 0; j < super.getNbColonnes(); j++) {
-				pourcentage = getPourcentageSimilariteCodeVariant(this.dictionnaireAnnotations.get(i).getCodeVariant(),
+				pourcentage = this.getPourcentageSimilariteCodeVariant(
+						this.dictionnaireAnnotations.get(i).getCodeVariant(),
 						this.dictionnaireAnnotations.get(j).getCodeVariant());
-				insererElement(i, j, pourcentage);
+				this.insererElement(i, j, pourcentage);
 			}
 		}
 	}
@@ -104,29 +110,42 @@ public class MatriceSimilarite extends Matrice {
 	public void creerImageMatrice(String cheminFichier) throws FileNotFoundException, UnsupportedEncodingException {
 		PrintWriter writer = new PrintWriter(cheminFichier, "UTF-8");
 		int couleurMax = 100;
-		String lignes = "";
-		lignes += "P3\n";
-		lignes += "#Un exemple en couleur\n";
-		lignes += super.getNblignes() + " " + super.getNbColonnes() + "\n";
-		lignes += couleurMax + "\n";
+		StringBuilder lignes = new StringBuilder();
+		lignes.append("P3\n");
+		lignes.append("#Un exemple en couleur\n");
+		lignes.append(super.getNblignes()).append(" ").append(super.getNbColonnes()).append("\n");
+		lignes.append(couleurMax).append("\n");
 		for (int i = 0; i < super.getNblignes(); i++) {
 			for (int j = 0; j < super.getNbColonnes(); j++) {
-				if ((i > 1) && (i == j) && !this.dictionnaireAnnotations.get(i).getNomDeFichier()
-						.equals(this.dictionnaireAnnotations.get(i - 1).getNomDeFichier())) {
 
-					lignes += ((int) (super.getMatrice()[i][j] * 100)) + " 0 0 ";
-
+				boolean estSurLaDiagonaleEtFichierDifferent = (i > 1) && (i == j) && !this.dictionnaireAnnotations
+						.get(i).getNomDeFichier().equals(this.dictionnaireAnnotations.get(i - 1).getNomDeFichier());
+				if (estSurLaDiagonaleEtFichierDifferent) {
+					String pixelChangementDeFichier = (int) (super.getMatrice()[i][j] * 100) + " 0 0 ";
+					lignes.append(pixelChangementDeFichier);
 				} else {
-					lignes += (couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " "
-							+ (couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " "
-							+ (couleurMax - (int) (super.getMatrice()[i][j] * 100)) + " ";
-				}
+					String composanteRouge = (couleurMax - (int) (super.getMatrice()[i][j] * 100)) + "";
+					String composanteVert = composanteRouge;
+					String composanteBleu = composanteRouge;
+					lignes.append(composanteRouge).append(" ").append(composanteVert).append(" ").append(composanteBleu)
+							.append(" ");
 
+				}
 			}
-			lignes += "\n";
+			lignes.append("\n");
 		}
-		writer.println(lignes);
+		writer.println(lignes.toString());
 		writer.close();
+		try {
+			BufferedImage myPicture = ImageIO.read(new File(cheminFichier));
+			String extensionPng = cheminFichier + ".png";
+			if (!ImageIO.write(myPicture, "PNG", new File(extensionPng))) {
+				// Handle image not written case
+				System.out.println("Aucune image convertie");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// TODO : exportToCSV()
