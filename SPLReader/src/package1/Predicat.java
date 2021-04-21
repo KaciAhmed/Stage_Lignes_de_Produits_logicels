@@ -31,7 +31,7 @@ public class Predicat implements Serializable {
 	}
 
 	public String creerImplicationAvec(Predicat predicatAnnotationMere) {
-		return this.getNom() + " => " + predicatAnnotationMere;
+		return this.getNom() + " -> " + predicatAnnotationMere;
 	}
 
 	@Override

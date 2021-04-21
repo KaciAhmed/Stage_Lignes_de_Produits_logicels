@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
@@ -43,7 +44,7 @@ public class Parser {
 				parseur.calculerEtEcrireFichiersResultat(args, annotations);
 			} catch (ArithmeticException e) {
 				// TODO: handle exception
-				System.out.println("aucune annotation à calculer");
+				System.out.println("aucune annotation ï¿½ calculer");
 			}
 
 		} else {
@@ -110,7 +111,7 @@ public class Parser {
 
 		builder = new StringBuilder();
 		builder.append(nomDossierRacine).append(File.separator).append(nomDossierSortie).append(File.separator)
-				.append(nomFichierImplication).append(".txt");
+				.append(nomFichierImplication).append(".dot");
 		cheminFichierImplication = builder.toString();
 
 		builder = new StringBuilder();
@@ -230,7 +231,7 @@ public class Parser {
 			List<Annotation> annotations, Stack<Annotation> pileAnnotation, Annotation annotationCourante, int degre,
 			int indiceCurseurDeLigne) {
 		if (this.estCurseurFin(lignesFichier, indiceCurseurDeLigne)) {
-			// Tout est visité
+			// Tout est visitï¿½
 		} else {
 			String ligneCourante = lignesFichier.get(indiceCurseurDeLigne);
 			ligneCourante = ligneCourante.replaceAll(REGEX_TAB, STRING_VIDE);
@@ -492,14 +493,25 @@ public class Parser {
 	 ***************************************/
 
 	private void ecrireFichierImplication(List<Annotation> annotations, String cheminFichierSortieImplication) {
-		Set<String> implications = this.genererImplications(annotations, new ArrayList<Predicat>());
+		Set<String> implications = this.genererImplicationsDot(annotations, new ArrayList<Predicat>());
 		this.creerFichierImplication(implications, cheminFichierSortieImplication);
 	}
 
+	private Set<String> genererImplicationsDot(List<Annotation> annotations, List<Predicat> predicatsAnnotationMere) {
+		Set<String> resultat = new LinkedHashSet<String>();
+		Set<String> implications = genererImplications(annotations, predicatsAnnotationMere);
+		
+		resultat.add("digraph G {\n");
+		resultat.addAll(implications);
+		resultat.add("\n}");
+		return resultat;
+	}
+
 	private Set<String> genererImplications(List<Annotation> annotations, List<Predicat> predicatsAnnotationMere) {
-		Set<String> resultats = new HashSet<>();
-		Set<String> resultatsEnfant = new HashSet<>();
+		Set<String> resultats = new LinkedHashSet<String>();
+		Set<String> resultatsEnfant = new LinkedHashSet<String>();
 		List<Predicat> predicatsAnnotationCourant;
+		List<Annotation> annotationsEnfant = new ArrayList<Annotation>();
 
 		String implication;
 		for (Annotation annotation : annotations) {
@@ -513,7 +525,7 @@ public class Parser {
 				}
 			}
 			if (annotation.estComposer()) {
-				List<Annotation> annotationsEnfant = annotation.getAnnotationsEnfant();
+				annotationsEnfant = annotation.getAnnotationsEnfant();
 				resultatsEnfant = this.genererImplications(annotationsEnfant, predicatsAnnotationCourant);
 				resultats.addAll(resultatsEnfant);
 			}
@@ -647,7 +659,7 @@ public class Parser {
 		camembert.creerCamembert(proportionConcatenable, proprotionAnnotationsSimplifiable,
 				proprotionAnnotationsEliminable, proportionOrdinaire);
 
-		camembert.exporterCommeImage(cheminFichierImageDiag, 400, 300);
+		camembert.exporterCommeImage(cheminFichierImageDiag, 400, 400);
 		try {
 			matriceSimilariteCode.creerImageMatrice(cheminFichierImage);
 		} catch (FileNotFoundException e) {

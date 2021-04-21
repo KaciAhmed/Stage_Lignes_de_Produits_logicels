@@ -23,7 +23,7 @@ public class GraphiqueCamembert extends Graphique {
 		this.pieDataset.setValue("Eliminable", proportionEliminable);
 		this.pieDataset.setValue("Ordinaire", proportionOrdinaire);
 		// Create the chart
-		super.graphique = ChartFactory.createPieChart("Répartitions des Annotations", this.pieDataset, true, true,
+		super.graphique = ChartFactory.createPieChart("Repartitions des Annotations", this.pieDataset, true, true,
 				true);
 	}
 
