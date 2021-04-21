@@ -39,7 +39,13 @@ public class Parser {
 			inputDirectory = args[0];
 			lignesTotalsFichier = new ArrayList<>();
 			annotations = parseur.parser(inputDirectory);
-			parseur.calculerEtEcrireFichiersResultat(args, annotations);
+			try {
+				parseur.calculerEtEcrireFichiersResultat(args, annotations);
+			} catch (ArithmeticException e) {
+				// TODO: handle exception
+				System.out.println("aucune annotation à calculer");
+			}
+
 		} else {
 			System.out.println("Usage <path/to/code/> <optional/path/to/result.xml>");
 		}
@@ -63,6 +69,7 @@ public class Parser {
 		String cheminFichierLite = STRING_VIDE;
 		String cheminFichierMetricsAdditionnel = STRING_VIDE;
 		String cheminFichierImage = STRING_VIDE;
+		String cheminFichierImageDiag = STRING_VIDE;
 
 		final String nomDossierRacine = "out";
 		File dossierParDefaut = new File(nomDossierRacine);
@@ -83,6 +90,7 @@ public class Parser {
 		final String nomFichierSortieLite = "output_lite";
 		final String nomFichierMetricsAdditionnel = "output_MetricsAdditionnel";
 		final String nomFichierImage = "imageMatriceSimilarite";
+		final String nomFichierImageDiag = "repartitionsAnnotations";
 
 		builder = new StringBuilder();
 		if (args.length > 1) {
@@ -119,11 +127,18 @@ public class Parser {
 		builder.append(nomDossierRacine).append(File.separator).append(nomDossierSortie).append(File.separator)
 				.append(nomFichierImage).append(".pgm");
 		cheminFichierImage = builder.toString();
+
+		builder = new StringBuilder();
+		builder.append(nomDossierRacine).append(File.separator).append(nomDossierSortie).append(File.separator)
+				.append(nomFichierImageDiag).append(".png");
+		cheminFichierImageDiag = builder.toString();
+
 		this.ecrireFichierAnnotations(annotations, cheminFichierAnnotations);
 		this.ecrireFichierSynthese(annotations, cheminFichierSynthese);
 		this.ecrireFichierImplication(annotations, cheminFichierImplication);
 		this.ecrireFichierAnnotationsLite(annotations, cheminFichierLite);
-		this.ecrireFichierMetricsAdditionnel(annotations, cheminFichierMetricsAdditionnel, cheminFichierImage);
+		this.ecrireFichierMetricsAdditionnel(annotations, cheminFichierMetricsAdditionnel, cheminFichierImage,
+				cheminFichierImageDiag);
 	}
 
 	/****************************
@@ -158,6 +173,9 @@ public class Parser {
 							annotationCourante, degre, indiceCurseurDeLigne);
 					annotationsPrecalculer = this.simplifierAnnotations(annotations);
 					annotationsCalculer.addAll(annotationsPrecalculer);
+					System.out
+							.println("************************" + fichier.getName() + "*****************************");
+					System.out.println();
 				}
 			} else {
 				annotationsPrecalculer = this.lireDossier(fichier);
@@ -212,7 +230,7 @@ public class Parser {
 			List<Annotation> annotations, Stack<Annotation> pileAnnotation, Annotation annotationCourante, int degre,
 			int indiceCurseurDeLigne) {
 		if (this.estCurseurFin(lignesFichier, indiceCurseurDeLigne)) {
-			// Tout est visitï¿½
+			// Tout est visité
 		} else {
 			String ligneCourante = lignesFichier.get(indiceCurseurDeLigne);
 			ligneCourante = ligneCourante.replaceAll(REGEX_TAB, STRING_VIDE);
@@ -488,7 +506,7 @@ public class Parser {
 			predicatsAnnotationCourant = annotation.getProposition().getPredicats();
 			for (Predicat predicatAnnotation : predicatsAnnotationCourant) {
 				for (Predicat predicatAnnotationMere : predicatsAnnotationMere) {
-					if(!predicatAnnotation.getNom().isEmpty() && !predicatAnnotationMere.getNom().isEmpty()) {
+					if (!predicatAnnotation.getNom().isEmpty() && !predicatAnnotationMere.getNom().isEmpty()) {
 						implication = predicatAnnotation.creerImplicationAvec(predicatAnnotationMere);
 						resultats.add(implication);
 					}
@@ -602,30 +620,34 @@ public class Parser {
 	 ***************************************/
 
 	private void ecrireFichierMetricsAdditionnel(List<Annotation> annotations,
-			String cheminFichierSortieMetricsAdditionnel, String cheminFichierImage) {
+			String cheminFichierSortieMetricsAdditionnel, String cheminFichierImage, String cheminFichierImageDiag) {
 
 		List<Annotation> annotationsRedondanteEliminable = new ArrayList<>();
 		List<Annotation> annotationsRedondanteSimplifiable = new ArrayList<>();
 		this.identifierAnnotationsRedondantes(annotations, annotationsRedondanteSimplifiable,
 				annotationsRedondanteEliminable);
-
 		MetricsAdditionnel metricsAdditionnel = new MetricsAdditionnel();
 		double proprotionAnnotationsSimplifiable = metricsAdditionnel
 				.calculerProportionAnnotationSimplifiable(annotations, annotationsRedondanteSimplifiable);
 		proprotionAnnotationsSimplifiable = Math.round(proprotionAnnotationsSimplifiable * 100.0) / 100.0;
-
 		double proprotionAnnotationsEliminable = metricsAdditionnel.calculerProportionAnnotationEliminable(annotations,
 				annotationsRedondanteEliminable);
 		proprotionAnnotationsEliminable = Math.round(proprotionAnnotationsEliminable * 100.0) / 100.0;
-
 		List<String> lignesSansVides = this.obtenirCodeSansLignesVides();
 		List<Annotation> annotationsSansVides = new ArrayList<>();
 		this.creerArborescenceDesAnnotations("", lignesSansVides, annotationsSansVides, new Stack<>(), null, 0, 0);
 		Long nbAnnotationsConcatenable = metricsAdditionnel.compterNombreAnnotationConcatenable(annotationsSansVides);
-
 		List<Annotation> annotationsLineariser = this.lineariserAnnotations(annotations);
 		Matrice matriceSimilariteCode = metricsAdditionnel.getMatriceSimilariteCode(annotationsLineariser);
 
+		GraphiqueCamembert camembert = new GraphiqueCamembert();
+		double proportionConcatenable = (nbAnnotationsConcatenable + 0.0) / (annotationsLineariser.size() + 0.0);
+		double proportionOrdinaire = 1.0 - proportionConcatenable - proprotionAnnotationsSimplifiable
+				- proprotionAnnotationsEliminable;
+		camembert.creerCamembert(proportionConcatenable, proprotionAnnotationsSimplifiable,
+				proprotionAnnotationsEliminable, proportionOrdinaire);
+
+		camembert.exporterCommeImage(cheminFichierImageDiag, 400, 300);
 		try {
 			matriceSimilariteCode.creerImageMatrice(cheminFichierImage);
 		} catch (FileNotFoundException e) {
