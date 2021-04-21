@@ -499,8 +499,8 @@ public class Parser {
 
 	private Set<String> genererImplicationsDot(List<Annotation> annotations, List<Predicat> predicatsAnnotationMere) {
 		Set<String> resultat = new LinkedHashSet<String>();
-		Set<String> implications = genererImplications(annotations, predicatsAnnotationMere);
-		
+		Set<String> implications = this.genererImplications(annotations, predicatsAnnotationMere);
+
 		resultat.add("digraph G {\n");
 		resultat.addAll(implications);
 		resultat.add("\n}");
@@ -557,7 +557,12 @@ public class Parser {
 	private void ecrireFichierAnnotationsLite(List<Annotation> annotations, String fichierSortieAnnotationLite) {
 		int nbIndentation = 0;
 		String nomFichierComparer = "";
-		List<String> listeResultat = this.creerListeAnnotationsLite(annotations, nbIndentation, nomFichierComparer);
+
+		int nombreLigneDeCode = 0;
+		int nombreAnnotation = 0;
+		int nombrePredicat = 0;
+		List<String> listeResultat = this.creerListeAnnotationsLite(annotations, nbIndentation, nomFichierComparer,
+				nombreLigneDeCode, nombreAnnotation, nombrePredicat);
 
 		try {
 			FileWriter fw = new FileWriter(fichierSortieAnnotationLite, false);
@@ -575,30 +580,51 @@ public class Parser {
 		}
 	}
 
-	private List<String> creerListeAnnotationsLite(List<Annotation> annotations, int nbIndentation, String nomFichier) {
+	private List<String> creerListeAnnotationsLite(List<Annotation> annotations, int nbIndentation, String nomFichier,
+			int nombreLigneDeCode, int nombreAnnotation, int nombrePredicat) {
 		List<String> listeAnnotationsLite = new ArrayList<>();
 		List<Annotation> annotationsEnfantCourant = new ArrayList<>();
 		List<String> AnnotationsLiteEnfant = new ArrayList<>();
 		String indentation = this.faireIndentationTabulation(nbIndentation);
 		String nomDeFichierCourant = "";
 		nbIndentation++;
+
+		int compteur = 0;
+
 		for (Annotation annotation : annotations) {
 			nomDeFichierCourant = annotation.getNomDeFichier();
-			if (!this.estMemeNomDeFichier(nomFichier, nomDeFichierCourant)) {
+			if (!this.estMemeNomDeFichier(nomDeFichierCourant, nomFichier)) {
+				if (compteur > 0) {
+					listeAnnotationsLite.add("TOTAL : ");
+					listeAnnotationsLite.add("* LOC = " + nombreLigneDeCode);
+					listeAnnotationsLite.add("* Annotations = " + nombreAnnotation);
+					listeAnnotationsLite.add("* Predicats = " + nombrePredicat);
+					listeAnnotationsLite.add("\n");
+					nombreLigneDeCode = 0;
+					nombreAnnotation = 0;
+					nombrePredicat = 0;
+				}
 				listeAnnotationsLite.add("FICHIER : " + nomDeFichierCourant);
 				nomFichier = nomDeFichierCourant;
+
 			}
+
 			String ligneIndenter = indentation + annotation.getProposition().getFormule() + "\t"
 					+ annotation.getNombreDeLigne();
+
+			listeAnnotationsLite.add(ligneIndenter);
+
 			if (annotation.estComposer()) {
-				listeAnnotationsLite.add(ligneIndenter);
 				annotationsEnfantCourant = annotation.getAnnotationsEnfant();
 				AnnotationsLiteEnfant = this.creerListeAnnotationsLite(annotationsEnfantCourant, nbIndentation,
-						nomFichier);
+						nomFichier, nombreLigneDeCode, nombreAnnotation, nombrePredicat);
 				listeAnnotationsLite.addAll(AnnotationsLiteEnfant);
-			} else {
-				listeAnnotationsLite.add(ligneIndenter);
 			}
+			compteur++;
+
+			nombreLigneDeCode += annotation.getNombreDeLigne();
+			nombreAnnotation++;
+			nombrePredicat += annotation.getProposition().getPredicats().size();
 		}
 		return listeAnnotationsLite;
 	}
