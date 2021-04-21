@@ -47,15 +47,17 @@ public class MatriceSimilarite extends Matrice {
 
 	private double getPourcentageSimilariteCodeVariant(CodeVariant codeVariant1, CodeVariant codeVariant2) {
 		double pourcentage = 0;
+		long nbLigneSimilaire = 0;
+
+		this.supprimerLignesVideCodeVariant(codeVariant1);
+		this.supprimerLignesVideCodeVariant(codeVariant2);
+
 		int sizeVariant1 = codeVariant1.getLigneDeCode().size();
 		int sizeVariant2 = codeVariant2.getLigneDeCode().size();
 
 		long minNbLigne = Math.min(sizeVariant1, sizeVariant2);
 		long maxNbLigne = Math.max(sizeVariant1, sizeVariant2);
 
-		long nbLigneSimilaire = 0;
-		this.supprimerLignesVideCodeVariant(codeVariant1);
-		this.supprimerLignesVideCodeVariant(codeVariant2);
 		for (int i = 0; i < minNbLigne; i++) {
 			this.pretraitmentLigneCodeVariant(codeVariant1.getLigneDeCode().get(i),
 					codeVariant2.getLigneDeCode().get(i));
