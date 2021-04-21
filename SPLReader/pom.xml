@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>fr.teapot</groupId>
-  <artifactId>package1</artifactId>
+  <artifactId>splreader</artifactId>
   <version>0.0.1</version>
 
   <name>SPLReader</name>
