@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
@@ -21,6 +22,8 @@ import java.util.Stack;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+
+import spltransform.App;
 
 public class Parser {
 	private static final String DEBUT_ANNOTATION_NON_ESPACER = "//";
@@ -43,7 +46,20 @@ public class Parser {
 				parseur.calculerEtEcrireFichiersResultat(args, annotations);
 			} catch (ArithmeticException e) {
 				// TODO: handle exception
-				System.out.println("aucune annotation � calculer");
+				System.out.println("Je n'ai trouvé aucune annotation.");
+				System.out.println(
+						"Je peux ré-essayé en essayant une modification qui risque de modifier de façon permanente vos fichiers.");
+				System.out.println("Voulez vous continuez ?");
+				boolean estDaccord = !(System.console().readLine().isEmpty());
+				if (estDaccord) {
+					System.out.println(
+							"Je ré-essaie en faisant une transformation de l'entète des annotations via SPLTransform.");
+					App.main(new String[] { inputDirectory });
+					Parser.main(args);
+				}
+			} catch (StackOverflowError e) {
+				System.out.println("Voici le message de l'exception StackOverflow : " + e.getMessage());
+				System.out.println("Vérifiez que vous n'avez pas laisser de fichiers inutiles!");
 			}
 
 		} else {
@@ -110,7 +126,7 @@ public class Parser {
 
 		builder = new StringBuilder();
 		builder.append(nomDossierRacine).append(File.separator).append(nomDossierSortie).append(File.separator)
-				.append(nomFichierImplication).append(".txt");
+				.append(nomFichierImplication).append(".dot");
 		cheminFichierImplication = builder.toString();
 
 		builder = new StringBuilder();
@@ -230,7 +246,7 @@ public class Parser {
 			List<Annotation> annotations, Stack<Annotation> pileAnnotation, Annotation annotationCourante, int degre,
 			int indiceCurseurDeLigne) {
 		if (this.estCurseurFin(lignesFichier, indiceCurseurDeLigne)) {
-			// Tout est visit�
+			// Tout est visit�
 		} else {
 			String ligneCourante = lignesFichier.get(indiceCurseurDeLigne);
 			ligneCourante = ligneCourante.replaceAll(REGEX_TAB, STRING_VIDE);
@@ -492,14 +508,25 @@ public class Parser {
 	 ***************************************/
 
 	private void ecrireFichierImplication(List<Annotation> annotations, String cheminFichierSortieImplication) {
-		Set<String> implications = this.genererImplications(annotations, new ArrayList<Predicat>());
+		Set<String> implications = this.genererImplicationsDot(annotations, new ArrayList<Predicat>());
 		this.creerFichierImplication(implications, cheminFichierSortieImplication);
 	}
 
+	private Set<String> genererImplicationsDot(List<Annotation> annotations, List<Predicat> predicatsAnnotationMere) {
+		Set<String> resultat = new LinkedHashSet<String>();
+		Set<String> implications = this.genererImplications(annotations, predicatsAnnotationMere);
+
+		resultat.add("digraph G {\n");
+		resultat.addAll(implications);
+		resultat.add("\n}");
+		return resultat;
+	}
+
 	private Set<String> genererImplications(List<Annotation> annotations, List<Predicat> predicatsAnnotationMere) {
-		Set<String> resultats = new HashSet<>();
-		Set<String> resultatsEnfant = new HashSet<>();
+		Set<String> resultats = new LinkedHashSet<String>();
+		Set<String> resultatsEnfant = new LinkedHashSet<String>();
 		List<Predicat> predicatsAnnotationCourant;
+		List<Annotation> annotationsEnfant = new ArrayList<Annotation>();
 
 		String implication;
 		for (Annotation annotation : annotations) {
@@ -513,7 +540,7 @@ public class Parser {
 				}
 			}
 			if (annotation.estComposer()) {
-				List<Annotation> annotationsEnfant = annotation.getAnnotationsEnfant();
+				annotationsEnfant = annotation.getAnnotationsEnfant();
 				resultatsEnfant = this.genererImplications(annotationsEnfant, predicatsAnnotationCourant);
 				resultats.addAll(resultatsEnfant);
 			}
@@ -545,7 +572,12 @@ public class Parser {
 	private void ecrireFichierAnnotationsLite(List<Annotation> annotations, String fichierSortieAnnotationLite) {
 		int nbIndentation = 0;
 		String nomFichierComparer = "";
-		List<String> listeResultat = this.creerListeAnnotationsLite(annotations, nbIndentation, nomFichierComparer);
+
+		int nombreLigneDeCode = 0;
+		int nombreAnnotation = 0;
+		int nombrePredicat = 0;
+		List<String> listeResultat = this.creerListeAnnotationsLite(annotations, nbIndentation, nomFichierComparer,
+				nombreLigneDeCode, nombreAnnotation, nombrePredicat);
 
 		try {
 			FileWriter fw = new FileWriter(fichierSortieAnnotationLite, false);
@@ -563,30 +595,51 @@ public class Parser {
 		}
 	}
 
-	private List<String> creerListeAnnotationsLite(List<Annotation> annotations, int nbIndentation, String nomFichier) {
+	private List<String> creerListeAnnotationsLite(List<Annotation> annotations, int nbIndentation, String nomFichier,
+			int nombreLigneDeCode, int nombreAnnotation, int nombrePredicat) {
 		List<String> listeAnnotationsLite = new ArrayList<>();
 		List<Annotation> annotationsEnfantCourant = new ArrayList<>();
 		List<String> AnnotationsLiteEnfant = new ArrayList<>();
 		String indentation = this.faireIndentationTabulation(nbIndentation);
 		String nomDeFichierCourant = "";
 		nbIndentation++;
+
+		int compteur = 0;
+
 		for (Annotation annotation : annotations) {
 			nomDeFichierCourant = annotation.getNomDeFichier();
-			if (!this.estMemeNomDeFichier(nomFichier, nomDeFichierCourant)) {
+			if (!this.estMemeNomDeFichier(nomDeFichierCourant, nomFichier)) {
+				if (compteur > 0) {
+					listeAnnotationsLite.add("TOTAL : ");
+					listeAnnotationsLite.add("* LOC = " + nombreLigneDeCode);
+					listeAnnotationsLite.add("* Annotations = " + nombreAnnotation);
+					listeAnnotationsLite.add("* Predicats = " + nombrePredicat);
+					listeAnnotationsLite.add("\n");
+					nombreLigneDeCode = 0;
+					nombreAnnotation = 0;
+					nombrePredicat = 0;
+				}
 				listeAnnotationsLite.add("FICHIER : " + nomDeFichierCourant);
 				nomFichier = nomDeFichierCourant;
+
 			}
+
 			String ligneIndenter = indentation + annotation.getProposition().getFormule() + "\t"
 					+ annotation.getNombreDeLigne();
+
+			listeAnnotationsLite.add(ligneIndenter);
+
 			if (annotation.estComposer()) {
-				listeAnnotationsLite.add(ligneIndenter);
 				annotationsEnfantCourant = annotation.getAnnotationsEnfant();
 				AnnotationsLiteEnfant = this.creerListeAnnotationsLite(annotationsEnfantCourant, nbIndentation,
-						nomFichier);
+						nomFichier, nombreLigneDeCode, nombreAnnotation, nombrePredicat);
 				listeAnnotationsLite.addAll(AnnotationsLiteEnfant);
-			} else {
-				listeAnnotationsLite.add(ligneIndenter);
 			}
+			compteur++;
+
+			nombreLigneDeCode += annotation.getNombreDeLigne();
+			nombreAnnotation++;
+			nombrePredicat += annotation.getProposition().getPredicats().size();
 		}
 		return listeAnnotationsLite;
 	}
@@ -636,18 +689,18 @@ public class Parser {
 		List<String> lignesSansVides = this.obtenirCodeSansLignesVides();
 		List<Annotation> annotationsSansVides = new ArrayList<>();
 		this.creerArborescenceDesAnnotations("", lignesSansVides, annotationsSansVides, new Stack<>(), null, 0, 0);
-		Long nbAnnotationsConcatenable = metricsAdditionnel.compterNombreAnnotationConcatenable(annotationsSansVides);
+		Long nbAnnotationsFusionable= metricsAdditionnel.compterNombreAnnotationConcatenable(annotationsSansVides);
 		List<Annotation> annotationsLineariser = this.lineariserAnnotations(annotations);
 		Matrice matriceSimilariteCode = metricsAdditionnel.getMatriceSimilariteCode(annotationsLineariser);
 
 		GraphiqueCamembert camembert = new GraphiqueCamembert();
-		double proportionConcatenable = (nbAnnotationsConcatenable + 0.0) / (annotationsLineariser.size() + 0.0);
+		double proportionConcatenable = (nbAnnotationsFusionable + 0.0) / (annotationsLineariser.size() + 0.0);
 		double proportionOrdinaire = 1.0 - proportionConcatenable - proprotionAnnotationsSimplifiable
 				- proprotionAnnotationsEliminable;
 		camembert.creerCamembert(proportionConcatenable, proprotionAnnotationsSimplifiable,
 				proprotionAnnotationsEliminable, proportionOrdinaire);
 
-		camembert.exporterCommeImage(cheminFichierImageDiag, 400, 300);
+		camembert.exporterCommeImage(cheminFichierImageDiag, 400, 400);
 		try {
 			matriceSimilariteCode.creerImageMatrice(cheminFichierImage);
 		} catch (FileNotFoundException e) {
@@ -660,7 +713,7 @@ public class Parser {
 
 		MetricsAdditionnelWrapper metricsAdditionnelWrapper = new MetricsAdditionnelWrapper(
 				annotationsRedondanteSimplifiable, annotationsRedondanteEliminable, proprotionAnnotationsSimplifiable,
-				proprotionAnnotationsEliminable, nbAnnotationsConcatenable);
+				proprotionAnnotationsEliminable, nbAnnotationsFusionable);
 		jaxbObjectToXML(metricsAdditionnelWrapper, cheminFichierSortieMetricsAdditionnel);
 	}
 

@@ -16,13 +16,13 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class MetricsVital {
 
-	private float moyenneDegree; // sum(moyenne degree) / nbAnnotationsGroupe
+	private float moyenneDegree; // sum(moyenne degree dans l'annotation synthèese) / nbAnnotationsGroupe(nb annotationn synthèse = nb annotations groupes)
 	private float dispersionPredicatsDansLesAnnotations; // nbPredicatTotal / nbAnnotationTotal
-	private float avgVarFanOutOnVPG; // nbPredicatTotalDeTousLesVPGs / nbVpgTotal // var // fan-out-onVPG
+	private double avgVarFanOutOnVPG; // nbPredicatTotalDeTousLesVPGs / nbVpgTotal // var // fan-out-onVPG
 	private float avgVarFanOutOnFile; // (nbPredicatsParFichier / NbFichier) d'un fichier // var // fan-in-on file
 	private float avgVarFanInOnFile; // nbPredicatsTotalDeTousLesFichier / nbFichiers // // Var fan-out-on file
 	private float avgVpFanInOnFile; // nbAnnotationsDifferent / nbAnnotationsTotal d'un
-	@XmlTransient // fichier // VP Fan in on file
+	@XmlTransient
 	private Set<Predicat> ensemblePredicats;
 	@XmlTransient
 	private Map<Predicat, List<AnnotationGroupe>> appartenancePredicatVPG;
@@ -40,7 +40,7 @@ public class MetricsVital {
 	}
 
 	public MetricsVital(float moyenneDegree, float dispersionPredicatsDansLesAnnotations,
-			float rapporPredicatsParGroupesAnnotations, float rapporPredicatsfichierParNbTotalFichier,
+			double rapporPredicatsParGroupesAnnotations, float rapporPredicatsfichierParNbTotalFichier,
 			float moyenneNbPredicatTousLesFichierParNbTotalFichier,
 			float rapportAnnotationDifferenteParAnnotationTotal) {
 		super();
@@ -91,7 +91,7 @@ public class MetricsVital {
 		this.setDispersionPredicatsDansLesAnnotations(resultat);
 	}
 
-	public float calculerMoyenneVPGParPredicat(Predicat predicat, int nbTotalGroupeAnnotation) {
+	public double calculerMoyenneVPGParPredicat(Predicat predicat, int nbTotalGroupeAnnotation) {
 		List<AnnotationGroupe> lstAnnotationGroupeOfPredicat = this.appartenancePredicatVPG.get(predicat);
 		int nbOccurance = 0;
 		for (AnnotationGroupe annotationGroupe : lstAnnotationGroupeOfPredicat) {
@@ -101,7 +101,7 @@ public class MetricsVital {
 				}
 			}
 		}
-		return nbOccurance / nbTotalGroupeAnnotation;
+		return (nbOccurance + 0.0) / (nbTotalGroupeAnnotation + 0.0);
 	}
 
 	public boolean verifierAppartenancePredicat(Predicat predicat, AnnotationGroupe annotationGroupe) {
@@ -133,14 +133,16 @@ public class MetricsVital {
 		this.recupererTousPredicatsProjet(annotationsGroupes);
 		int nbTotalGroupeAnnotation = annotationsGroupes.size();
 		this.remplirAppratenancePredicatVPG(annotationsGroupes);
-		List<Float> listMoyenneParPredicat = new ArrayList<>();
+		List<Double> listMoyenneParPredicat = new ArrayList<>();
+		double moyenneVPG = 0.0;
 		for (Predicat predicat : this.ensemblePredicats) {
-			listMoyenneParPredicat
-					.add(Float.valueOf(this.calculerMoyenneVPGParPredicat(predicat, nbTotalGroupeAnnotation)));
+			moyenneVPG = this.calculerMoyenneVPGParPredicat(predicat, nbTotalGroupeAnnotation);
+			listMoyenneParPredicat.add(moyenneVPG);
 		}
-		Double resultat = listMoyenneParPredicat.stream().mapToDouble(e -> e).sum() / listMoyenneParPredicat.size();
-		this.setAvgVarFanOutOnVPG(resultat.floatValue());
-
+		double resultat = listMoyenneParPredicat.stream().mapToDouble(e -> e).sum()
+				/ (listMoyenneParPredicat.size() + 0.0);
+		resultat = Math.round(resultat * 100.0) / 100.0;
+		this.setAvgVarFanOutOnVPG(resultat);
 	}
 
 	public float calculerMoyenneFichiersParPredicat(Predicat predicat, int nbTotalFichier) {
@@ -297,11 +299,11 @@ public class MetricsVital {
 		this.appartenancePredicatVPG = appartenancePredicatVPG;
 	}
 
-	public float getAvgVarFanOutOnVPG() {
+	public double getAvgVarFanOutOnVPG() {
 		return this.avgVarFanOutOnVPG;
 	}
 
-	public void setAvgVarFanOutOnVPG(float avgVarFanOutOnVPG) {
+	public void setAvgVarFanOutOnVPG(double avgVarFanOutOnVPG) {
 		this.avgVarFanOutOnVPG = avgVarFanOutOnVPG;
 	}
 

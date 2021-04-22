@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>fr.teapot</groupId>
-  <artifactId>package1</artifactId>
+  <artifactId>splreader</artifactId>
   <version>0.0.1</version>
 
   <name>SPLReader</name>
@@ -49,6 +49,12 @@
 	    <artifactId>jfreechart</artifactId>
 	    <version>1.5.3</version>
 	</dependency>
+	<!-- https://gitlab.com/yanisallouch/spltransform -->
+	<dependency>
+		<groupId>Teapot</groupId>
+	  	<artifactId>spltransform</artifactId>
+	  	<version>0.0.1-SNAPSHOT</version>
+  </dependency>
     
   </dependencies>
 

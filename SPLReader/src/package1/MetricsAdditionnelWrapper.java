@@ -11,16 +11,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "root")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class MetricsAdditionnelWrapper {
-	@XmlElement(name = "annotationsSimplifiable")
+	@XmlElement(name = "Simplifiable")
 	private List<Annotation> annotationsSimplifiable = null;
-	@XmlElement(name = "annotationsEliminable")
+	@XmlElement(name = "Eliminable")
 	private List<Annotation> annotationsEliminable = null;
-	@XmlElement(name = "proportionAnnotationsSimplifiable")
+	@XmlElement(name = "proportionSimplifiable")
 	private double proportionAnnotationSimplifiable = 0;
-	@XmlElement(name = "proportionAnnotationsEliminable")
+	@XmlElement(name = "proportionEliminable")
 	private double proprtionAnnotationEliminable = 0;
-	@XmlElement(name = "nombreAnnotationsConcatenable")
-	private Long nbAnnotationConcatenable;
+	@XmlElement(name = "nombreAnnotationsFusionnable")
+	private Long nbAnnotationFusionnable;
 
 	public MetricsAdditionnelWrapper() {
 		super();
@@ -36,7 +36,7 @@ public class MetricsAdditionnelWrapper {
 		this.annotationsEliminable = annotationsEliminable;
 		this.proportionAnnotationSimplifiable = proportionAnnotationSimplifiable;
 		this.proprtionAnnotationEliminable = proprtionAnnotationEliminable;
-		this.nbAnnotationConcatenable = nbAnnotationConcatenable;
+		this.nbAnnotationFusionnable = nbAnnotationConcatenable;
 	}
 
 }
