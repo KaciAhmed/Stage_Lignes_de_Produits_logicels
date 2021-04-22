@@ -1,3 +1,4 @@
+
 package package1;
 
 import java.awt.image.BufferedImage;
@@ -149,6 +150,4 @@ public class MatriceSimilarite extends Matrice {
 			e.printStackTrace();
 		}
 	}
-
-	// TODO : exportToCSV()
 }

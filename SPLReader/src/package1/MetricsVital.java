@@ -16,13 +16,13 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class MetricsVital {
 
-	private float moyenneDegree; // sum(moyenne degree dans l'annotation synthèese) / nbAnnotationsGroupe(nb annotationn synthèse = nb annotations groupes)
+	private float moyenneDegree; // sum(moyenne degree) / nbAnnotationsGroupe
 	private float dispersionPredicatsDansLesAnnotations; // nbPredicatTotal / nbAnnotationTotal
 	private double avgVarFanOutOnVPG; // nbPredicatTotalDeTousLesVPGs / nbVpgTotal // var // fan-out-onVPG
 	private float avgVarFanOutOnFile; // (nbPredicatsParFichier / NbFichier) d'un fichier // var // fan-in-on file
 	private float avgVarFanInOnFile; // nbPredicatsTotalDeTousLesFichier / nbFichiers // // Var fan-out-on file
 	private float avgVpFanInOnFile; // nbAnnotationsDifferent / nbAnnotationsTotal d'un
-	@XmlTransient
+	@XmlTransient // fichier // VP Fan in on file
 	private Set<Predicat> ensemblePredicats;
 	@XmlTransient
 	private Map<Predicat, List<AnnotationGroupe>> appartenancePredicatVPG;
