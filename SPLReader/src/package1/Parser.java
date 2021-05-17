@@ -43,8 +43,8 @@ public class Parser {
 			try {
 				parseur.calculerEtEcrireFichiersResultat(args, annotations);
 			} catch (ArithmeticException e) {
-				// TODO: handle exception
-				System.out.println("Je n'ai trouvé aucune annotation. Ceci est peut-etre du a une syntaxe, pensez a utiliser SPLTransform !");
+				System.out.println(
+						"Je n'ai trouvé aucune annotation. Ceci est peut-etre du a une syntaxe, pensez a utiliser SPLTransform !");
 			} catch (StackOverflowError e) {
 				System.out.println("Voici le message de l'exception StackOverflow : " + e.getMessage());
 				System.out.println("Vérifiez que vous n'avez pas laisser de fichiers inutiles!");
@@ -691,10 +691,8 @@ public class Parser {
 		try {
 			matriceSimilariteCode.creerImageMatrice(cheminFichierImage);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
