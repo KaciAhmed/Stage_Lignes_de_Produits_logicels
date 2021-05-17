@@ -48,14 +48,7 @@
 	    <groupId>org.jfree</groupId>
 	    <artifactId>jfreechart</artifactId>
 	    <version>1.5.3</version>
-	</dependency>
-	<!-- https://gitlab.com/yanisallouch/spltransform -->
-	<dependency>
-		<groupId>Teapot</groupId>
-	  	<artifactId>spltransform</artifactId>
-	  	<version>0.0.1-SNAPSHOT</version>
-  </dependency>
-    
+	</dependency>    
   </dependencies>
 
   <build>

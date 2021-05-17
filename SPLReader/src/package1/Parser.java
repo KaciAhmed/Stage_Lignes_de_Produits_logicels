@@ -23,8 +23,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import spltransform.App;
-
 public class Parser {
 	private static final String DEBUT_ANNOTATION_NON_ESPACER = "//";
 	private static final String DEBUT_ANNOTATION_ESPACER = "//\\s++";
@@ -46,22 +44,11 @@ public class Parser {
 				parseur.calculerEtEcrireFichiersResultat(args, annotations);
 			} catch (ArithmeticException e) {
 				// TODO: handle exception
-				System.out.println("Je n'ai trouvé aucune annotation.");
-				System.out.println(
-						"Je peux ré-essayé en essayant une modification qui risque de modifier de façon permanente vos fichiers.");
-				System.out.println("Voulez vous continuez ?");
-				boolean estDaccord = !(System.console().readLine().isEmpty());
-				if (estDaccord) {
-					System.out.println(
-							"Je ré-essaie en faisant une transformation de l'entète des annotations via SPLTransform.");
-					App.main(new String[] { inputDirectory });
-					Parser.main(args);
-				}
+				System.out.println("Je n'ai trouvé aucune annotation. Ceci est peut-etre du a une syntaxe, pensez a utiliser SPLTransform !");
 			} catch (StackOverflowError e) {
 				System.out.println("Voici le message de l'exception StackOverflow : " + e.getMessage());
 				System.out.println("Vérifiez que vous n'avez pas laisser de fichiers inutiles!");
 			}
-
 		} else {
 			System.out.println("Usage <path/to/code/> <optional/path/to/result.xml>");
 		}
@@ -689,7 +676,7 @@ public class Parser {
 		List<String> lignesSansVides = this.obtenirCodeSansLignesVides();
 		List<Annotation> annotationsSansVides = new ArrayList<>();
 		this.creerArborescenceDesAnnotations("", lignesSansVides, annotationsSansVides, new Stack<>(), null, 0, 0);
-		Long nbAnnotationsFusionable= metricsAdditionnel.compterNombreAnnotationConcatenable(annotationsSansVides);
+		Long nbAnnotationsFusionable = metricsAdditionnel.compterNombreAnnotationConcatenable(annotationsSansVides);
 		List<Annotation> annotationsLineariser = this.lineariserAnnotations(annotations);
 		Matrice matriceSimilariteCode = metricsAdditionnel.getMatriceSimilariteCode(annotationsLineariser);
 
