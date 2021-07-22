@@ -59,16 +59,19 @@ public class MatriceSimilarite extends Matrice {
 		long minNbLigne = Math.min(sizeVariant1, sizeVariant2);
 		long maxNbLigne = Math.max(sizeVariant1, sizeVariant2);
 
-		for (int i = 0; i < minNbLigne; i++) {
-			this.pretraitmentLigneCodeVariant(codeVariant1.getLigneDeCode().get(i),
-					codeVariant2.getLigneDeCode().get(i));
-			if (codeVariant1.getLigneDeCode().get(i).equals(codeVariant2.getLigneDeCode().get(i))) {
-				nbLigneSimilaire++;
+		if ((maxNbLigne == 0) && (minNbLigne == 0)) {
+			return 1;
+		} else {
+			for (int i = 0; i < minNbLigne; i++) {
+				this.pretraitmentLigneCodeVariant(codeVariant1.getLigneDeCode().get(i),
+						codeVariant2.getLigneDeCode().get(i));
+				if (codeVariant1.getLigneDeCode().get(i).equals(codeVariant2.getLigneDeCode().get(i))) {
+					nbLigneSimilaire++;
+				}
 			}
+			pourcentage = (nbLigneSimilaire + 0.0) / (maxNbLigne + 0.0);
+			return pourcentage;
 		}
-		pourcentage = (nbLigneSimilaire + 0.0) / (maxNbLigne + 0.0);
-
-		return pourcentage;
 	}
 
 	private void pretraitmentLigneCodeVariant(String ligne1, String ligne2) {
